@@ -1,7 +1,7 @@
 const fs  = require('fs');
 const fsSync = require('node:fs')
 const path = require('path');
-const SAMPLE_FILE = './sample-files/sample.txt'
+const SAMPLE_FILE = path.join(__dirname, 'sample-files/sample.txt')
 
 // Write a sample file for demonstration
 try {
@@ -21,6 +21,7 @@ fs.readFile(SAMPLE_FILE, 'utf8', (err, data) => {
 })
 
 // Callback hell example (test and leave it in comments):
+/*
 fs.readFile('./sample-files/sample.txt', 'utf8', (err, data) => {
   if (err) {
     console.error(err)
@@ -35,16 +36,15 @@ fs.readFile('./sample-files/sample.txt', 'utf8', (err, data) => {
     })
   }
 })
+*/
 
 // 2. Promise style
 function promiseRead(file) {
   return new Promise((resolve, reject) => {
     fs.readFile(file, 'utf8', ((err, data) => {
       if (err) {
-        //console.error(`Error in promise read: ${err}`)
         reject(err)
       } else {
-        //console.log(`Promise read: ${data}`)
         resolve(data)
       }
     }))
