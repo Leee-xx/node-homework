@@ -43,4 +43,9 @@ async function streamLargeFile(file) {
 }
 
 const largeFile = path.join(__dirname, 'sample-files/largefile.txt')
+let largeText = ''
+for (let i = 0; i < 100; i++) {
+  largeText += `${i}: Hello world\n`
+}
+fs.writeFileSync(largeFile, largeText)
 streamLargeFile(largeFile)

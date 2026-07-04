@@ -18,10 +18,10 @@ Web applications, servers
 
 **CommonJS (default in Node.js):**
 ```js
-import { useState, useEffect } from "react";
+const { register, logoff } = require("../controllers/userController");
 ```
 
 **ES Modules (supported in modern Node.js):**
 ```js
-const { register, logoff } = require("../controllers/userController");
+import { useState, useEffect } from "react";
 ```
