@@ -58,8 +58,12 @@ promiseRead(SAMPLE_FILE)
 
 // 3. Async/Await style
 async function asyncAwaitRead(file) {
-  const data = await promiseRead(file)
-  console.log(`async/await read: ${data}`)
+  try {
+    const data = await promiseRead(file)
+    console.log(`Async/Await read: ${data}`)
+  } catch(err) {
+    console.error(`Error in asyncAwaitRead(): ${err.message}`)
+  }
 }
 
 asyncAwaitRead(SAMPLE_FILE)
