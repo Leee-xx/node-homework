@@ -18,13 +18,25 @@ console.log(`Joined path: ${samplePath}`)
 
 // fs.promises API
 const demoFile = `${path.join(samplePath, 'demo.txt')}`
-fs.promises.writeFile(demoFile, 'Hello from fs.promises')
+async function fsPromisesWrite(demoFile) {
+  try {
+    await fs.promises.writeFile(demoFile, 'Hello from fs.promises')
+  } catch(error) {
+    console.error(`Error writing to demo.txt: ${error.message}`)
+  }
+}
+
 async function fsPromisesRead(demoFile) {
   const contents = await fs.promises.readFile(demoFile, { encoding: 'utf8' })
   console.log(`fs.promises read: ${contents}`)
 }
 
-fsPromisesRead(demoFile)
+async function runFsPromises(demoFile) {
+  await fsPromisesWrite(demoFile)
+  fsPromisesRead(demoFile)
+}
+
+runFsPromises(demoFile)
 
 // Streams for large files- log first 40 chars of each chunk
 async function streamLargeFile(file) {
