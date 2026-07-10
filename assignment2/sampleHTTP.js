@@ -20,6 +20,8 @@ document.getElementById('getTimeBtn').addEventListener('click', async () => {
 </html>
 `;
 
+const port = process.env.PORT || 8000
+
 const server = http.createServer((req, res) => {
   if (req.method === "GET" && req.url === "/time") {
     res.writeHead(200, { "Content-Type": "application/json" });
@@ -39,14 +41,23 @@ const server = http.createServer((req, res) => {
     });
 
     req.on("end", () => {
-      const parsedBody = JSON.parse(body);
+      try {
+        const parsedBody = JSON.parse(body);
 
-      res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(
-        JSON.stringify({
-          weReceived: parsedBody,
-        }),
-      );
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            weReceived: parsedBody,
+          }),
+        );
+      } catch (_error) {
+        res.writeHead(400, { 'Content-Type': 'application/json' })
+        res.end(
+          JSON.stringify({
+            message: 'Invalid JSON.'
+          })
+        )
+      }
     });
   } else {
     res.writeHead(404, { "Content-Type": "application/json" });
@@ -58,5 +69,42 @@ const server = http.createServer((req, res) => {
   }
 });
 
-server.listen(8000);
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`Port ${port} is already in use`)
+  } else {
+    console.error('Server error:', err)
+  }
 
+  process.exit(1)
+})
+
+let isShuttingDown = false
+
+async function shutdown(code = 0) {
+  if (isShuttingDown) return
+
+  isShuttingDown = true
+
+  console.log('Shutting down gracefully...')
+
+  try {
+    await new Promise((resolve, reject) => {
+      server.close((err) => {
+        if (err) reject(err)
+        else resolve()
+      })
+    })
+    console.log('HTTP server clsoed.')
+  } catch (err) {
+    console.error('Error during shutdown:', err)
+    code = 1
+  } finally {
+    process.exit(code)
+  }
+}
+
+process.on('SIGINT', () => shutdown(0))
+process.on('SIGTERM', () => shutdown(0))
+
+server.listen(port);

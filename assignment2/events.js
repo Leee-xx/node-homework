@@ -2,7 +2,7 @@ const EventEmitter = require('events')
 const emitter = new EventEmitter()
 
 emitter.on('time', (message) => {
-  console.log(`Time received: ${message}`)
+  console.log('Time received:',  message)
 })
 
 if (require.main === module) {
