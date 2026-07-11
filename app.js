@@ -4,9 +4,8 @@ const timeRouter = require('./routes/timeRoutes')
 const port = process.env.PORT || 3000
 
 const app = express()
-app.use(timeRouter)
-app.use(express.json())
 
+app.use(express.json())
 app.use('/api', timeRouter)
 
 app.get('/', (req, res) => {

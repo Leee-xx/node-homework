@@ -95,7 +95,7 @@ async function shutdown(code = 0) {
         else resolve()
       })
     })
-    console.log('HTTP server clsoed.')
+    console.log('HTTP server closed.')
   } catch (err) {
     console.error('Error during shutdown:', err)
     code = 1
