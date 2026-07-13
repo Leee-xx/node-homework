@@ -18,13 +18,11 @@ app.post('/testpost', (req, res) => {
   })
 })
 
-//*
 app.all('*splat', (req, res) => {
   res.status(404).json({
     message: `No route found for ${req.method} ${req.path}`,
   })
 })
-//*/
 
 const server = app.listen(port, () => {
   console.log(`Server is listening on port ${port}`)
