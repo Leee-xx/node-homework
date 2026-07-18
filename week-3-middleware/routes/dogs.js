@@ -17,7 +17,9 @@ router.post("/adopt", (req, res, next) => {
     return next(new ValidationError('Missing required fields'))
   }
 
-  if (dogName === 'Nonexistent Dog') {
+  const dog = dogs.find((d) => d.name === dogName)
+
+  if (!dog) {
     return next(new NotFoundError('not found or not available'))
   }
 
