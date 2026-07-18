@@ -1,6 +1,8 @@
+const { randomUUID } = require('crypto')
+
 function register(req, res) {
   const user = {
-    id: 1,
+    id: randomUUID,
     name: req.body.name,
     email: req.body.email,
     password: req.body.password,
