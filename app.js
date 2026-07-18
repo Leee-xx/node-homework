@@ -10,11 +10,13 @@ const port = process.env.PORT || 3000
 
 const app = express()
 
-function initalizeGlobals() {
+function initializeGlobals() {
   global.user_id = null
   global.users = []
   global.tasks = []
 }
+
+initializeGlobals()
 
 app.use(express.json())
 app.use('/api', timeRouter)
