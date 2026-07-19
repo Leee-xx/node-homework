@@ -1,22 +1,14 @@
 function register(req, res) {
-  const user = global.users.find((u) => u.email === req.body.email)
-
-  if (user) {
-    return res.status(409).json({
-      error: 'Account already exists with this email',
-    })
-  }
-
-  const newUser = {
+  const user = {
     name: req.body.name,
     email: req.body.email,
     password: req.body.password,
   }
 
-  global.users.push(newUser)
-  global.user_id = newUser
+  global.users.push(user)
+  global.user_id = user
 
-  res.status(201).json({ name: newUser.name, email: newUser.email })
+  res.status(201).json({ name: user.name, email: user.email })
 }
 
 function logon(req, res) {
