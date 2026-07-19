@@ -23,14 +23,14 @@ function logon(req, res) {
     global.user_id = user.id
     res.status(200).json({ name: user.name, email: user.email })
   } else {
-    res.status(401)
+    res.status(401).json({ error: 'Username/password were incorrect', requestId: req.requestId })
   }
 }
 
 function logoff(req, res) {
   global.user_id = null
 
-  res.status(200)
+  res.status(200).json({})
 }
 
 module.exports = { register, logon, logoff }

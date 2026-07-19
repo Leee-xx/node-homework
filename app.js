@@ -19,13 +19,14 @@ function initializeGlobals() {
 initializeGlobals()
 
 app.use(express.json())
+
+// Routes
 app.use('/api', timeRouter)
 app.use('/api/users', userRouter)
 
 app.get('/', (req, res) => {
   res.send('Hello, World!')
 })
-
 app.post('/testpost', (req, res) => {
   res.status(200).json({
     message: 'POST route works',

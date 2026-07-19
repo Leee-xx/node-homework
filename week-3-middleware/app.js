@@ -54,7 +54,7 @@ app.use((req, res, next) => {
 // Error handler
 app.use((err, req, res, next) => {
   const status = err.statusCode || 500
-  const message = err.message || 'Internal Server Error'
+  const message = status === 500 ? 'Internal Server Error' : err.message
 
   if (status >= 400 && status < 500) {
     console.warn(`WARN: ${err.name} - ${message}`)
