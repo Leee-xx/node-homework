@@ -2,8 +2,6 @@ const express = require("express");
 const dogsRouter = require("./routes/dogs");
 const path = require('path')
 
-const { randomUUID } = require('crypto')
-
 const app = express();
 
 // Assignment 3b and 3c ask you to add middleware in this file.
@@ -13,7 +11,7 @@ app.use((req, res, next) => {
   next()
 })
 app.use((req, res, next) => {
-  const timestamp = new Date().toLocaleString()
+  const timestamp = new Date().toISOString()
   console.log(`[${timestamp}]: ${req.method} ${req.path} (${req.requestId})`)
   next()
 })
