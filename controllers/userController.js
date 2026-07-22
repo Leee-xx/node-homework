@@ -1,31 +1,64 @@
 const crypto = require('crypto')
 const util = require('util')
-const scrypt = util.promisify(crypto.script)
+const scrypt = util.promisify(crypto.scrypt)
 
-function register(req, res) {
+const { userSchema } = require('../validation/userSchema')
+
+async function register(req, res) {
+  if (!req.body) req.body = {}
+
+  const { error, value } = userSchema.validate(
+    {
+      email: req.body.email,
+      name: req.body.name,
+      password: req.body.password,
+    },
+    { abortEarly: false }
+  )
+
+  if (error) {
+    return res.status(400).json({
+      error: error.message
+    })
+  }
+
+  // check for dupe emails
+
+  const hashedPassword = await hashPassword(value.password)
+
   const user = {
-    name: req.body.name,
-    email: req.body.email,
-    password: hashPassword(req.body.password),
+    name: value.name,
+    email: value.email,
+    hashedPassword,
   }
 
   global.users.push(user)
   global.user_id = user
 
-  res.status(201).json({ name: user.name, email: user.email })
+  res.status(201).json({ email: user.email, name: user.name })
 }
 
-function logon(req, res) {
-  const { email, password } = req.body
+async function logon(req, res) {
+  const { email } = req.body
 
-  const user = global.users.find((u) => u.email == email && u.password == password)
+  const user = global.users.find((u) => u.email == email)
 
-  if (user) {
-    global.user_id = user
-    res.status(200).json({ name: user.name, email: user.email })
-  } else {
-    res.status(401).json({ error: 'Username/password were incorrect' })
+  if (!user) {
+    return res.status(401).json({ error: 'Username not found' })
   }
+
+  const passwordMatches = await comparePassword(req.body.password, user.hashedPassword)
+
+  if (!passwordMatches) {
+    return res.status(401).json({
+      error: 'Incorrect password',
+    })
+  }
+
+  global.user_id = user
+
+  const { password, ...sanitizedUser } = user
+  res.status(200).json(sanitizedUser)
 }
 
 function logoff(req, res) {
