@@ -7,8 +7,6 @@ function create(req, res) {
     })
   }
 
-  //if (!req.body?.email)
-
   const { error, value } = taskSchema.validate(
     {
       title: req.body.title,
@@ -57,6 +55,9 @@ function show(req, res) {
   const task = global.tasks.find((t) => t.id === taskId)
 
   if (!task) {
+    return res.status(404).json({
+      error: 'Task not found'
+    })
   }
 
   res.status(200).json(sanitizeTask(task))
@@ -90,6 +91,23 @@ function deleteTask(req, res) {
   const taskId = getTaskId(req)
   if (!taskId) return sendMissingTaskId(res)
 
+  const task = global.tasks.find((t) => t.id === taskId)
+
+  if (!task) {
+    return res.status(404).json({
+      error: 'Task not found',
+    })
+  }
+
+  if (task.userId !== global.user_id.email) {
+    return res.status(403).json({
+      error: 'Unauthorized',
+    })
+  }
+
+  global.tasks = global.tasks.filter((t) => t.id !== taskId)
+
+  res.status(200).json(sanitizeTask(task))
 }
 
 const taskCounter = (() => {
