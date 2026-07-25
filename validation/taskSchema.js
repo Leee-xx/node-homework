@@ -6,7 +6,7 @@ const taskSchema = Joi.object({
 })
 
 const patchTaskSchema = Joi.object({
-  title: Joi.string().trim().min(3).max(30).required(),
+  title: Joi.string().trim().min(3).max(30),
   isCompleted: Joi.boolean().not(null),
 }).min(1).message('No attributes to change were specified.')
 

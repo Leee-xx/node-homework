@@ -64,25 +64,46 @@ function show(req, res) {
 }
 
 function update(req, res) {
+  if (!req.body || Object.keys(req.body).length === 0) {
+    return res.status(400).json({
+      error: 'No data present'
+    })
+  }
+
   const taskId = getTaskId(req)
   if (!taskId) return sendMissingTaskId(res)
 
   const task = global.tasks.find((t) => t.id === taskId)
-
-
-  if (task) {
-    if (task.userId == global.user_id.email) {
-      Object.assign(task, { isCompleted: true })
-    } else {
-      return res.status(404).json({
-        error: 'No task found',
-      })
-    }
-  } else {
+  if (!task) {
     return res.status(404).json({
-      error: 'Could not find task with given id'
+      error: 'No task found',
     })
   }
+
+
+  if (task.userId !== global.user_id.email) {
+    return res.status(404).json({
+      error: 'No task found',
+    })
+  }
+
+  const { value, error } = patchTaskSchema.validate(
+    {
+      title: req.body.title,
+      isCompleted: req.body.isCompleted,
+    },
+    {
+      abortEarly: false
+    }
+  )
+
+  if (error) {
+    return res.status(400).json({
+      error: error.message,
+    })
+  }
+
+  Object.assign(task, value)
 
   res.status(200).json(sanitizeTask(task))
 }
