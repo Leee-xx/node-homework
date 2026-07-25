@@ -90,7 +90,6 @@ function update(req, res) {
   const { value, error } = patchTaskSchema.validate(
     {
       title: req.body.title,
-      isCompleted: req.body.isCompleted,
     },
     {
       abortEarly: false
