@@ -4,9 +4,9 @@ const { create, index, show, update, deleteTask } = require('../controllers/task
 const router = express.Router()
 
 router.get('/', index)
-router.get('/:taskId', show)
+router.get('/:id', show)
 router.post('/', create)
-router.patch('/:taskId', update)
-router.delete('/:taskId', delete)
+router.patch('/:id', update)
+router.delete('/:id', deleteTask)
 
-export.modules = router
+module.exports = router

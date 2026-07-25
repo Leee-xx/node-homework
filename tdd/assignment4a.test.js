@@ -237,6 +237,7 @@ describe("Assignment 4a: Protected Task Routes", () => {
 
     it("The updated task does not include userId.", () => {
       saveData = saveRes._getJSONData();
+      console.log('here:', saveData)
       expect(saveData.userId).not.toBeDefined();
       expect(saveData.isCompleted).toBe(true);
     });
