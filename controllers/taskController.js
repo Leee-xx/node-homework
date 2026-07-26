@@ -54,7 +54,7 @@ function show(req, res) {
 
   const task = global.tasks.find((t) => t.id === taskId)
 
-  if (!task || task.userId !== global.userId.email) {
+  if (!task || task.userId !== global.user_id.email) {
     return res.status(404).json({
       error: 'No task found',
     })
@@ -90,7 +90,7 @@ function update(req, res) {
   const { value, error } = patchTaskSchema.validate(
     {
       title: req.body.title,
-      isCompleted: req.body.isCompleted,
+      isCompleted: req.body.isCompleted || false,
     },
     {
       abortEarly: false
@@ -114,15 +114,9 @@ function deleteTask(req, res) {
 
   const task = global.tasks.find((t) => t.id === taskId)
 
-  if (!task || task.userId !== global.userId.email) {
+  if (!task || task.userId !== global.user_id.email) {
     return res.status(404).json({
       error: 'Task not found',
-    })
-  }
-
-  if (task.userId !== global.user_id.email) {
-    return res.status(403).json({
-      error: 'Unauthorized',
     })
   }
 
