@@ -23,6 +23,13 @@ async function register(req, res) {
   }
 
   // check for dupe emails
+  const existingUser = global.users.find((u) => u.email === value.email)
+
+  if (existingUser) {
+    return res.status(400).json({
+      error: 'User already exists with this email',
+    })
+  }
 
   const hashedPassword = await hashPassword(value.password)
 

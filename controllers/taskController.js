@@ -54,16 +54,36 @@ function show(req, res) {
 
   const task = global.tasks.find((t) => t.id === taskId)
 
-  if (!task || task.userId !== global.user_id.email) {
+  if (!task) {
     return res.status(404).json({
       error: 'No task found',
     })
+  }
+
+  if (task.userId !== global.user_id.email) {
+    return sendMissingTaskId(res)
   }
 
   res.status(200).json(sanitizeTask(task))
 }
 
 function update(req, res) {
+  const { value, error } = patchTaskSchema.validate(
+    {
+      title: req.body.title,
+      isCompleted: req.body.isCompleted || false,
+    },
+    {
+      abortEarly: false
+    }
+  )
+
+  if (error) {
+    return res.status(400).json({
+      error: error.message,
+    })
+  }
+
   if (!req.body || Object.keys(req.body).length === 0) {
     return res.status(400).json({
       error: 'No data present'
@@ -84,22 +104,6 @@ function update(req, res) {
   if (task.userId !== global.user_id.email) {
     return res.status(404).json({
       error: 'No task found',
-    })
-  }
-
-  const { value, error } = patchTaskSchema.validate(
-    {
-      title: req.body.title,
-      isCompleted: req.body.isCompleted || false,
-    },
-    {
-      abortEarly: false
-    }
-  )
-
-  if (error) {
-    return res.status(400).json({
-      error: error.message,
     })
   }
 
