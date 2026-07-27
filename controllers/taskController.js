@@ -1,6 +1,8 @@
 const { taskSchema, patchTaskSchema } = require ('../validation/taskSchema')
 
 function create(req, res) {
+  if (!req.body) req.body = {}
+
   if (!global.user_id) {
     return res.status(401).json({
       error: 'Unauthorized'
@@ -8,9 +10,7 @@ function create(req, res) {
   }
 
   const { error, value } = taskSchema.validate(
-    {
-      title: req.body.title,
-    },
+    req.body,
     {
       abortEarly: false
     }
