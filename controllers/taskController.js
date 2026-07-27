@@ -68,11 +68,10 @@ function show(req, res) {
 }
 
 function update(req, res) {
+  if (!req.body) req.body = {}
+
   const { value, error } = patchTaskSchema.validate(
-    {
-      title: req.body.title,
-      isCompleted: req.body.isCompleted || false,
-    },
+    req.body,
     {
       abortEarly: false
     }
