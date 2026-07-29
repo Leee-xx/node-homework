@@ -1,0 +1,5 @@
+# task 1
+select order_id, sum(li.quantity * p.price) as total_price  from line_items li join products p on li.product_id = p.product_id group by order_id order by order_id limit 5;
+
+# task 2
+(select order_id, sum(li.quantity * p.price) as total_price  from line_items li join products p on li.product_id = p.product_id group by order_id);
