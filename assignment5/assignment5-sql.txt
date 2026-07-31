@@ -18,12 +18,11 @@ select customer_id from customers where customer_name = 'Perez and Sons';
 select employee_id from employees where first_name = 'Miranda' AND last_name = 'Harris';
 select * from products order by price limit 5;
 BEGIN;
-insert into orders customer_id, employee_id, date VALUES (16, 7, CURRENT_DATE) returning order_id;
-insert into line_items order_id, product_id, quantity VALUES
-  (order_id, , 10),
-  (order_id, , 10),
-  (order_id, , 10),
-  (order_id, , 10),
-  (order_id, , 10)
-  ;
+insert into orders (customer_id, employee_id, date) VALUES (16, 7, CURRENT_DATE) returning order_id into last_order_id;
+insert into line_items (order_id, product_id, quantity) VALUES
+  (last_order_id, 23, 10),
+  (last_order_id, 18, 10),
+  (last_order_id, 43, 10),
+  (last_order_id, 9, 10),
+  (last_order_id, 44, 10);
 COMMIT;
