@@ -1,4 +1,5 @@
 const express = require('express')
+const pool = require('./db/pg-pool')
 
 // Routes
 const userRouter = require('./routes/userRoutes')
@@ -24,6 +25,14 @@ initializeGlobals()
 app.use(express.json())
 
 // Routes
+app.get('/health', async (req, res) => {
+  try {
+    await pool.query('SELECT 1')
+    res.json({ status: 'OK', db: 'connected' })
+  } catch (err) {
+    res.status(500).json({ error: `db not connected: ${err.message}` })
+  }
+})
 app.use('/api/users', userRouter)
 app.use('/api/tasks', authMiddleware, taskRouter)
 
@@ -32,6 +41,11 @@ app.use(errorHandler)
 
 const server = app.listen(port, () => {
   console.log(`Server is listening on port ${port}`)
+})
+
+process.on('SIGTERM', () => {
+  await pool.end()
+  server.close()
 })
 
 module.exports = { app, server }

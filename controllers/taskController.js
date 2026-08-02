@@ -1,6 +1,7 @@
 const { taskSchema, patchTaskSchema } = require ('../validation/taskSchema')
+const pool = require('../db/pg-pool')
 
-function create(req, res) {
+await function create(req, res) {
   if (!req.body) req.body = {}
 
   if (!global.user_id) {
@@ -22,13 +23,12 @@ function create(req, res) {
     })
   }
 
-  const task = {
-    id: taskCounter(),
-    userId: global.user_id.email,
-    ...value
-  }
-
-  global.tasks.push(task)
+  const task = await pool.query(
+    'INSERT INTO tasks (title, is_completed, user_id) ' \
+    'VALUES($1, $2, $3) ' \
+    'RETURNING id, title, is_completed',
+    [value.title, value.is_completed, global.user_id]
+  )
 
   res.status(201).json(sanitizeTask(task))
 }
