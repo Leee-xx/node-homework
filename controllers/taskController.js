@@ -1,7 +1,7 @@
 const { taskSchema, patchTaskSchema } = require ('../validation/taskSchema')
 const pool = require('../db/pg-pool')
 
-await function create(req, res) {
+async function create(req, res) {
   if (!req.body) req.body = {}
 
   if (!global.user_id) {
@@ -23,19 +23,24 @@ await function create(req, res) {
     })
   }
 
-  const task = await pool.query(
-    'INSERT INTO tasks (title, is_completed, user_id) ' \
-    'VALUES($1, $2, $3) ' \
+  const results = await pool.query(
+    'INSERT INTO tasks (title, is_completed, user_id) ' +
+    'VALUES($1, $2, $3) ' +
     'RETURNING id, title, is_completed',
-    [value.title, value.is_completed, global.user_id]
+    [value.title, value.isCompleted, global.user_id]
   )
 
-  res.status(201).json(sanitizeTask(task))
+  const task = results.rows[0]
+  res.status(201).json(task)
 }
 
-function index(req, res) {
-  const email = global.user_id.email
-  const tasks = global.tasks.filter((t) => t.userId === email)
+async function index(req, res) {
+  const results = await pool.query(
+    'SELECT id, is_completed, title FROM tasks WHERE user_id = $1',
+    [global.user_id],
+  )
+
+  const tasks = results.rows
 
   if (tasks.length === 0) {
     return res.status(404).json({
@@ -43,16 +48,15 @@ function index(req, res) {
     })
   }
 
-  const sanitizedTasks = tasks.map((t) => sanitizeTask(t))
-  res.status(200).json(sanitizedTasks)
+  res.status(200).json(tasks)
 }
 
-function show(req, res) {
+async function show(req, res) {
   const taskId = getTaskId(req)
 
   if (!taskId) return sendMissingTaskId(res)
 
-  const task = global.tasks.find((t) => t.id === taskId)
+  const task = await pool.query('SELECT id, title, is_completed FROM tasks where id = $1 AND user_id = $2', [taskId, global.user_id])
 
   if (!task) {
     return res.status(404).json({
@@ -60,14 +64,10 @@ function show(req, res) {
     })
   }
 
-  if (task.userId !== global.user_id.email) {
-    return sendMissingTaskId(res)
-  }
-
-  res.status(200).json(sanitizeTask(task))
+  res.status(200).json(task)
 }
 
-function update(req, res) {
+async function update(req, res) {
   if (!req.body) req.body = {}
 
   const { value, error } = patchTaskSchema.validate(
@@ -92,13 +92,22 @@ function update(req, res) {
   const taskId = getTaskId(req)
   if (!taskId) return sendMissingTaskId(res)
 
-  const task = global.tasks.find((t) => t.id === taskId)
+  let keys = Object.keys(value)
+  keys = keys.map((k) => k === 'isCompleted' ? 'is_completed' : k)
+  const setClauses = keys.map((k, i) => `${k} = $${i + 1}`).join(', ')
+  const idParam = `$${keys.length + 1}`
+  const userParam = `$${keys.length + 2}`
+  const results = await pool.query(
+    `UPDATE tasks SET ${setClauses} WHERE id = ${idParam} AND user_id = ${userParam} RETURNING id, is_completed, title`,
+    [...Object.values(value), taskId, global.user_id])
+
+  const task = results.rows[0]
+
   if (!task) {
     return res.status(404).json({
       error: 'No task found',
     })
   }
-
 
   if (task.userId !== global.user_id.email) {
     return res.status(404).json({
@@ -108,34 +117,24 @@ function update(req, res) {
 
   Object.assign(task, value)
 
-  res.status(200).json(sanitizeTask(task))
+  res.status(200).json(task)
 }
 
-function deleteTask(req, res) {
+async function deleteTask(req, res) {
   const taskId = getTaskId(req)
   if (!taskId) return sendMissingTaskId(res)
 
-  const task = global.tasks.find((t) => t.id === taskId)
+  const results = await pool.query('DELETE FROM tasks WHERE id = $1 AND user_id = $2 RETURNING id, title, is_completed', [taskId, global.user_id])
 
-  if (!task || task.userId !== global.user_id.email) {
+  const task = results.rows[0]
+  if (!task) {
     return res.status(404).json({
       error: 'Task not found',
     })
   }
 
-  global.tasks = global.tasks.filter((t) => t.id !== taskId)
-
-  res.status(200).json(sanitizeTask(task))
+  res.status(200).json(task)
 }
-
-const taskCounter = (() => {
-  let lastTaskNumber = 0
-
-  return () => {
-    lastTaskNumber += 1
-    return lastTaskNumber
-  }
-})()
 
 function sendMissingTaskId(res) {
   return res.status(400).json({
@@ -149,12 +148,6 @@ function getTaskId(req) {
   if (!taskId) return
 
   return parseInt(taskId)
-}
-
-function sanitizeTask(task) {
-  const { userId, ...sanitizedTask } = task
-
-  return sanitizedTask
 }
 
 module.exports = {

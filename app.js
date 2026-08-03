@@ -43,7 +43,7 @@ const server = app.listen(port, () => {
   console.log(`Server is listening on port ${port}`)
 })
 
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
   await pool.end()
   server.close()
 })

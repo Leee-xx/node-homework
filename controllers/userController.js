@@ -5,7 +5,7 @@ const pool = require('../db/pg-pool')
 
 const { userSchema } = require('../validation/userSchema')
 
-async function register(req, res) {
+async function register(req, res, next) {
   if (!req.body) req.body = {}
 
   const { error, value } = userSchema.validate(
@@ -25,7 +25,7 @@ async function register(req, res) {
   }
 
   // check for dupe emails
-  const results = pool.query('SELECT * FROM users WHERE email = $1', [email])
+  const results = await pool.query('SELECT * FROM users WHERE email = $1', [value.email])
 
   if (results.rows.length > 0) {
     return res.status(400).json({
@@ -38,10 +38,11 @@ async function register(req, res) {
   let user = null
 
   try {
-    user = await pool.query(
-      'INSERT INTO users (email, name, hashed_password) VALUES [$1, $2, $3] RETURNING id, email, name',
+    const results = await pool.query(
+      'INSERT INTO users (email, name, hashed_password) VALUES ($1, $2, $3) RETURNING id, email, name',
       [value.email, value.name, value.hashedPassword]
     )
+    user = results.rows[0]
   } catch (e) {
     if (e.code === '23505') {
       return res.status(400).json({
@@ -60,14 +61,14 @@ async function register(req, res) {
 async function logon(req, res) {
   const { email } = req.body
 
-  const results = await pool.query('SELECT * FROM users WHERE email = $1', [email])
+  const results = await pool.query('SELECT id, email, name, hashed_password FROM users WHERE email = $1', [email])
 
   if (results.rows.length === 0) {
     return res.status(401).json({ error: 'Username not found' })
   }
 
   const user = results.rows[0]
-  const passwordMatches = await comparePassword(req.body.password, user.hashedPassword)
+  const passwordMatches = await comparePassword(req.body.password, user.hashed_password)
 
   if (!passwordMatches) {
     return res.status(401).json({
