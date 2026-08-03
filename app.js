@@ -16,8 +16,6 @@ const app = express()
 
 function initializeGlobals() {
   global.user_id = null
-  global.users = []
-  global.tasks = []
 }
 
 initializeGlobals()

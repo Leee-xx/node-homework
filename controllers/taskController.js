@@ -56,8 +56,9 @@ async function show(req, res) {
 
   if (!taskId) return sendMissingTaskId(res)
 
-  const task = await pool.query('SELECT id, title, is_completed FROM tasks where id = $1 AND user_id = $2', [taskId, global.user_id])
+  const results = await pool.query('SELECT id, title, is_completed FROM tasks where id = $1 AND user_id = $2', [taskId, global.user_id])
 
+  const task = results.rows[0]
   if (!task) {
     return res.status(404).json({
       error: 'No task found',
@@ -104,12 +105,6 @@ async function update(req, res) {
   const task = results.rows[0]
 
   if (!task) {
-    return res.status(404).json({
-      error: 'No task found',
-    })
-  }
-
-  if (task.userId !== global.user_id.email) {
     return res.status(404).json({
       error: 'No task found',
     })
