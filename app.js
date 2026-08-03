@@ -28,7 +28,7 @@ app.get('/health', async (req, res) => {
     await pool.query('SELECT 1')
     res.json({ status: 'OK', db: 'connected' })
   } catch (err) {
-    res.status(500).json({ error: `db not connected: ${err.message}` })
+    res.status(500).json({ message: `db not connected: ${err.message}` })
   }
 })
 app.use('/api/users', userRouter)

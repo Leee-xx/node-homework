@@ -6,7 +6,7 @@ async function create(req, res) {
 
   if (!global.user_id) {
     return res.status(401).json({
-      error: 'Unauthorized'
+      message: 'Unauthorized'
     })
   }
 
@@ -19,7 +19,7 @@ async function create(req, res) {
 
   if (error) {
     return res.status(400).json({
-      error: error.message,
+      message: error.message,
     })
   }
 
@@ -44,7 +44,7 @@ async function index(req, res) {
 
   if (tasks.length === 0) {
     return res.status(404).json({
-      error: 'No tasks found'
+      message: 'No tasks found'
     })
   }
 
@@ -61,7 +61,7 @@ async function show(req, res) {
   const task = results.rows[0]
   if (!task) {
     return res.status(404).json({
-      error: 'No task found',
+      message: 'No task found',
     })
   }
 
@@ -80,13 +80,13 @@ async function update(req, res) {
 
   if (error) {
     return res.status(400).json({
-      error: error.message,
+      message: error.message,
     })
   }
 
   if (!req.body || Object.keys(req.body).length === 0) {
     return res.status(400).json({
-      error: 'No data present'
+      message: 'No data present'
     })
   }
 
@@ -106,7 +106,7 @@ async function update(req, res) {
 
   if (!task) {
     return res.status(404).json({
-      error: 'No task found',
+      message: 'No task found',
     })
   }
 
@@ -124,7 +124,7 @@ async function deleteTask(req, res) {
   const task = results.rows[0]
   if (!task) {
     return res.status(404).json({
-      error: 'Task not found',
+      message: 'Task not found',
     })
   }
 
@@ -133,7 +133,7 @@ async function deleteTask(req, res) {
 
 function sendMissingTaskId(res) {
   return res.status(400).json({
-    error: 'The task ID is not present.',
+    message: 'The task ID is not present.',
   })
 }
 

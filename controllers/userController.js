@@ -19,7 +19,7 @@ async function register(req, res, next) {
 
   if (error) {
     return res.status(400).json({
-      error: error.message,
+      message: error.message,
       details: error.details,
     })
   }
@@ -29,7 +29,7 @@ async function register(req, res, next) {
 
   if (results.rows.length > 0) {
     return res.status(400).json({
-      error: 'User already exists with this email',
+      message: 'User already exists with this email',
     })
   }
 
@@ -46,7 +46,7 @@ async function register(req, res, next) {
   } catch (e) {
     if (e.code === '23505') {
       return res.status(400).json({
-        error: 'Account with this email already exists',
+        message: 'Account with this email already exists',
       })
     }
 
@@ -64,7 +64,7 @@ async function logon(req, res) {
   const results = await pool.query('SELECT id, email, name, hashed_password FROM users WHERE email = $1', [email])
 
   if (results.rows.length === 0) {
-    return res.status(401).json({ error: 'Username not found' })
+    return res.status(401).json({ message: 'Username not found' })
   }
 
   const user = results.rows[0]
@@ -72,7 +72,7 @@ async function logon(req, res) {
 
   if (!passwordMatches) {
     return res.status(401).json({
-      error: 'Incorrect password',
+      message: 'Incorrect password',
     })
   }
 
