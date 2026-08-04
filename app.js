@@ -26,7 +26,7 @@ app.use(express.json())
 app.get('/health', async (req, res) => {
   try {
     await pool.query('SELECT 1')
-    res.json({ status: 'OK', db: 'connected' })
+    res.json({ status: 'ok', db: 'connected' })
   } catch (err) {
     res.status(500).json({ message: `db not connected: ${err.message}` })
   }

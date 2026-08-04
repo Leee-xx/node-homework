@@ -20,4 +20,8 @@ COMMIT;
 select * from line_items where order_id=250;
 
 # task 4
-select first_name, last_name, count(o.order_id) as order_count from employees e join orders o on o.employee_id = e.employee_id group by e.employee_id, first_name, last_name having count(o.order_id) > 5 order by last_name;
+select first_name, last_name, count(o.order_id) as order_count from employees e
+join orders o on o.employee_id = e.employee_id
+group by e.employee_id, first_name, last_name
+having count(o.order_id) > 5
+order by last_name;
