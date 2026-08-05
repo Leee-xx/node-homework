@@ -1,0 +1,27 @@
+# task 1
+select order_id, sum(li.quantity * p.price) as total_price from line_items li join products p on li.product_id = p.product_id group by order_id order by order_id limit 5;
+
+# task 2
+select customer_name, avg(t.total_price) average_order_price from customers c
+join
+  (select customer_id, li.order_id, sum(li.quantity * p.price) total_price from line_items li join products p on li.product_id = p.product_id join orders o on li.order_id = o.order_id group by li.order_id, customer_id)
+  as t on t.customer_id = c.customer_id
+group by c.customer_id, c.customer_name
+order by customer_name;
+
+# task 3
+select customer_id from customers where customer_name = 'Perez and Sons';
+select employee_id from employees where first_name = 'Miranda' AND last_name = 'Harris';
+select * from products order by price limit 5;
+BEGIN;
+INSERT into orders (customer_id, employee_id, date) VALUES (16, 7, CURRENT_DATE) returning order_id;
+INSERT into line_items (order_id, product_id, quantity) VALUES (250, 23, 10), (250, 18, 10), (250, 43, 10), (250, 9, 10), (250, 44, 10);
+COMMIT;
+select * from line_items where order_id=250;
+
+# task 4
+select first_name, last_name, count(o.order_id) as order_count from employees e
+join orders o on o.employee_id = e.employee_id
+group by e.employee_id, first_name, last_name
+having count(o.order_id) > 5
+order by last_name;
