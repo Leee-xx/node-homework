@@ -2,6 +2,7 @@ const crypto = require('crypto')
 const util = require('util')
 const scrypt = util.promisify(crypto.scrypt)
 const pool = require('../db/pg-pool')
+const prisma = require('../db/prisma')
 
 const { userSchema } = require('../validation/userSchema')
 
@@ -25,6 +26,7 @@ async function register(req, res, next) {
   }
 
   // check for dupe emails
+  /*
   const results = await pool.query('SELECT * FROM users WHERE email = $1', [value.email])
 
   if (results.rows.length > 0) {
@@ -32,17 +34,18 @@ async function register(req, res, next) {
       message: 'User already exists with this email',
     })
   }
+  */
 
   value.hashedPassword = await hashPassword(value.password)
+  delete value.password
 
   let user = null
 
   try {
-    const results = await pool.query(
-      'INSERT INTO users (email, name, hashed_password) VALUES ($1, $2, $3) RETURNING id, email, name',
-      [value.email, value.name, value.hashedPassword]
-    )
-    user = results.rows[0]
+    user = await prisma.user.create({
+      data: value,
+      select: { name: true, email: true, id: true },
+    })
   } catch (e) {
     if (e.code === '23505') {
       return res.status(400).json({
@@ -59,16 +62,23 @@ async function register(req, res, next) {
 }
 
 async function logon(req, res) {
-  const { email } = req.body
+  let { email } = req.body
 
-  const results = await pool.query('SELECT id, email, name, hashed_password FROM users WHERE email = $1', [email])
+  if (!email) {
+    return res.status(400).json({
+      message: 'Must provide email',
+    })
+  }
 
-  if (results.rows.length === 0) {
+  email = email.toLowerCase()
+
+  const user = await prisma.user.findUnique({ where: { email } })
+
+  if (!user) {
     return res.status(401).json({ message: 'Username not found' })
   }
 
-  const user = results.rows[0]
-  const passwordMatches = await comparePassword(req.body.password, user.hashed_password)
+  const passwordMatches = await comparePassword(req.body.password, user.hashedPassword)
 
   if (!passwordMatches) {
     return res.status(401).json({

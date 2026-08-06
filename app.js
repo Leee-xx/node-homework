@@ -1,5 +1,5 @@
 const express = require('express')
-const pool = require('./db/pg-pool')
+const prisma = require('./db/prisma')
 
 // Routes
 const userRouter = require('./routes/userRoutes')
@@ -25,7 +25,7 @@ app.use(express.json())
 // Routes
 app.get('/health', async (req, res) => {
   try {
-    await pool.query('SELECT 1')
+    await prisma.$queryRaw`SELECT 1`
     res.json({ status: 'ok', db: 'connected' })
   } catch (err) {
     res.status(500).json({ message: `db not connected: ${err.message}` })
@@ -42,7 +42,8 @@ const server = app.listen(port, () => {
 })
 
 process.on('SIGTERM', async () => {
-  await pool.end()
+  await prisma.$disconnect()
+  console.log('Prisma disconnected')
   server.close()
 })
 
