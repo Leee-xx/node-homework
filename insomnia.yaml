@@ -1,0 +1,256 @@
+type: collection.insomnia.rest/5.0
+schema_version: "5.1"
+name: CTD Node
+meta:
+  id: wrk_76756c2d9c0b4a9b9b87f68cfd5e95e9
+  created: 1783463159608
+  modified: 1783463159608
+  description: ""
+collection:
+  - name: users
+    meta:
+      id: fld_aeab513f729d40e19125aa7636496005
+      created: 1786048667180
+      modified: 1786048667180
+      sortKey: -1786048667180
+      description: ""
+    children:
+      - url: "{{ _.hostname }}/api/users/logon"
+        name: logon
+        meta:
+          id: req_1aaff75e8f7c4f5aa2797e7b1c33e949
+          created: 1786048670021
+          modified: 1786130593991
+          isPrivate: false
+          description: ""
+          sortKey: -1786048673616
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"email": "test+1763857127746@example.com",
+            	"password": "Test1234!"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.hostname }}/api/users/register"
+        name: register
+        meta:
+          id: req_ec704eabba344e528ab99d9736c653a9
+          created: 1786049750384
+          modified: 1786129456505
+          isPrivate: false
+          description: ""
+          sortKey: -1786048673716
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"email": "test+{% faker 'timestamp' %}@example.com",
+            	"name": "Test User",
+            	"password": "Test1234!"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.hostname }}/api/users/register"
+        name: register - already registered
+        meta:
+          id: req_0a87dddeedc14462ac0bec19ca9ecd42
+          created: 1786129490112
+          modified: 1786129514741
+          isPrivate: false
+          description: ""
+          sortKey: -1786048673666
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"email": "test+1763857127746@example.com",
+            	"name": "Test User",
+            	"password": "Test1234!"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: tasks
+    meta:
+      id: fld_b7434d1ab7824fd38879646931e42131
+      created: 1786130998933
+      modified: 1786130998933
+      sortKey: -1786130998933
+      description: ""
+    children:
+      - url: "{{ _.hostname }}/api/tasks/"
+        name: index
+        meta:
+          id: req_bb760a0f51fe4e35abe92713538d14ae
+          created: 1786131011323
+          modified: 1786131028678
+          isPrivate: false
+          description: ""
+          sortKey: -1786131015540
+        method: GET
+        body:
+          mimeType: application/json
+          text: ""
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.hostname }}/api/tasks"
+        name: create
+        meta:
+          id: req_72d110256a144d30aae4d2454988e792
+          created: 1786131758755
+          modified: 1786131787840
+          isPrivate: false
+          description: ""
+          sortKey: -1786131015640
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"title": "some task"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.hostname }}/api/tasks/1"
+        name: update
+        meta:
+          id: req_fa28dd73866c432bb4a38738c85cf0dd
+          created: 1786132710241
+          modified: 1786133303193
+          isPrivate: false
+          description: ""
+          sortKey: -1786131015590
+        method: PATCH
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"title": "{% faker 'isoTimestamp' %}"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.hostname }}/api/tasks/1"
+        name: show
+        meta:
+          id: req_4223fdd366a84bb993b9172d2cc79ace
+          created: 1786133514180
+          modified: 1786133583414
+          isPrivate: false
+          description: ""
+          sortKey: -1786089844628
+        method: GET
+        body:
+          mimeType: application/json
+          text: ""
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_7d34e5901ec536f5760d17512c80a28f55d5699a
+    created: 1783463159617
+    modified: 1783463159617
+environments:
+  name: Base Environment
+  meta:
+    id: env_7d34e5901ec536f5760d17512c80a28f55d5699a
+    created: 1783463159615
+    modified: 1786049004368
+    isPrivate: false
+  data:
+    hostname: http://localhost:3000
