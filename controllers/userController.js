@@ -1,7 +1,6 @@
 const crypto = require('crypto')
 const util = require('util')
 const scrypt = util.promisify(crypto.scrypt)
-const pool = require('../db/pg-pool')
 const prisma = require('../db/prisma')
 
 const { userSchema } = require('../validation/userSchema')
@@ -25,17 +24,6 @@ async function register(req, res, next) {
     })
   }
 
-  // check for dupe emails
-  /*
-  const results = await pool.query('SELECT * FROM users WHERE email = $1', [value.email])
-
-  if (results.rows.length > 0) {
-    return res.status(400).json({
-      message: 'User already exists with this email',
-    })
-  }
-  */
-
   value.hashedPassword = await hashPassword(value.password)
   delete value.password
 
@@ -47,13 +35,13 @@ async function register(req, res, next) {
       select: { name: true, email: true, id: true },
     })
   } catch (e) {
-    if (e.code === '23505') {
+    if (e.name === 'PrismaClientKnownRequestError' && e.code === 'P2002') {
       return res.status(400).json({
         message: 'Account with this email already exists',
       })
+    } else {
+      return next(e)
     }
-
-    return next(e)
   }
 
   global.user_id = user.id
