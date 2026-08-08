@@ -1,6 +1,5 @@
 const express = require('express')
 const prisma = require('./db/prisma')
-const pool = require('../db/pg-pool')
 
 // Routes
 const userRouter = require('./routes/userRoutes')
@@ -50,7 +49,6 @@ process.on('SIGTERM', async () => {
   await prisma.$disconnect()
   console.log('Prisma disconnected')
 
-  await pool.end()
   server.close()
 })
 
