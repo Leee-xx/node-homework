@@ -24,14 +24,13 @@ async function register(req, res, next) {
     })
   }
 
-  value.hashedPassword = await hashPassword(value.password)
-  delete value.password
+  const hashedPassword = await hashPassword(value.password)
 
   let user = null
 
   try {
     user = await prisma.user.create({
-      data: value,
+      data: { name: value.name, email: value.email, hashedPassword },
       select: { name: true, email: true, id: true },
     })
   } catch (e) {

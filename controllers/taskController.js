@@ -78,12 +78,6 @@ async function show(req, res, next) {
       },
     })
 
-    if (!task) {
-      return res.status(404).json({
-        message: 'No task found',
-      })
-    }
-
     res.status(200).json(task)
   } catch (err) {
     if (err.code === 'P2025') {
