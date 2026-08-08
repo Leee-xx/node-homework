@@ -239,6 +239,29 @@ collection:
             send: true
             store: true
           rebuildPath: true
+      - url: "{{ _.hostname }}/api/tasks/1"
+        name: delete
+        meta:
+          id: req_12183469ce8c48d4a6640f88c22aceec
+          created: 1786216082183
+          modified: 1786216103525
+          isPrivate: false
+          description: ""
+          sortKey: -1786131015565
+        method: DELETE
+        headers:
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
 cookieJar:
   name: Default Jar
   meta:

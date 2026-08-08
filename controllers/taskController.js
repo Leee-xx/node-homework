@@ -1,6 +1,5 @@
 const { taskSchema, patchTaskSchema } = require ('../validation/taskSchema')
 const prisma = require('../db/prisma')
-const pool = require('../db/pg-pool') // TODO: delete
 
 async function create(req, res, next) {
   if (!req.body) req.body = {}
@@ -24,17 +23,6 @@ async function create(req, res, next) {
       details: error.details,
     })
   }
-
-  /*
-  const results = await pool.query(
-    'INSERT INTO tasks (title, is_completed, user_id) ' +
-    'VALUES($1, $2, $3) ' +
-    'RETURNING id, title, is_completed',
-    [value.title, value.isCompleted, global.user_id]
-  )
-
-  const task = results.rows[0]
-  */
 
   let task = null
   try {
@@ -62,6 +50,12 @@ async function index(req, res) {
     },
     select: { title: true, isCompleted: true, id: true },
   })
+
+  if (tasks.length === 0) {
+    return res.status(404).json({
+      message: 'No tasks found.',
+    })
+  }
 
   res.status(200).json(tasks)
 }
@@ -101,7 +95,6 @@ async function show(req, res, next) {
 }
 
 async function update(req, res, next) {
-  console.log(req.params)
   const taskId = getTaskId(req)
   if (!taskId) return sendMissingTaskId(res)
 
@@ -144,20 +137,27 @@ async function update(req, res, next) {
   }
 }
 
-async function deleteTask(req, res) {
+async function deleteTask(req, res, next) {
   const taskId = getTaskId(req)
   if (!taskId) return sendMissingTaskId(res)
 
-  const results = await pool.query('DELETE FROM tasks WHERE id = $1 AND user_id = $2 RETURNING id, title, is_completed', [taskId, global.user_id])
-
-  const task = results.rows[0]
-  if (!task) {
-    return res.status(404).json({
-      message: 'Task not found',
+  try {
+    const task = await prisma.task.delete({
+      where: {
+        id: taskId,
+        userId: global.user_id,
+      },
+      select: { title: true, isCompleted: true, id: true }
     })
-  }
 
-  res.status(200).json(task)
+    res.status(200).json(task)
+  } catch (err) {
+    if (err.code === 'P2025' ) {
+      return res.status(404).json({ message: "The task was not found."})
+    } else {
+      return next(err)
+    }
+  }
 }
 
 function sendMissingTaskId(res) {
