@@ -28,7 +28,7 @@ async function create(req, res, next) {
   try {
     task = await prisma.task.create({
       data: { ...value, userId: global.user_id },
-      select: { id: true, title: true, isCompleted: true },
+      select: { id: true, title: true, isCompleted: true, priority: true },
     })
   } catch (err) {
     if (err.name === 'PrismaClientKnownRequestError' && err.code === 'P2003') {
@@ -48,7 +48,19 @@ async function index(req, res) {
     where: {
       userId: global.user_id,
     },
-    select: { title: true, isCompleted: true, id: true },
+    select: {
+      title: true,
+      isCompleted: true,
+      id: true,
+      priority: true,
+      createdAt: true,
+      User: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
+    },
   })
 
   if (tasks.length === 0) {
