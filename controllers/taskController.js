@@ -245,9 +245,30 @@ async function bulkCreate(req, res, next) {
       return res.status(400).json({
         message: 'Validation failed',
         details: error.details,
-      })  
+      })
     }
 
+    validTasks.push({
+      title: value.title,
+      isCompleted: value.isCompleted || false,
+      priority: value.priority || 'medium',
+      userId: global.user_id,
+    })
+  }
+
+  try {
+    const result = await prisma.task.createMany({
+      data: validTasks,
+      skipDuplicates: false,
+    })
+
+    res.statu(201).json({
+      message: 'success!',
+      tasksCreated: result.count,
+      totalRequested: validTasks.length,
+    })
+  } catch (err) {
+    return next(err)
   }
 }
 

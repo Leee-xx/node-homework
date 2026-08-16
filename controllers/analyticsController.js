@@ -98,7 +98,21 @@ async function index(req, res) {
   })
 }
 
+async function search(req, res) {
+  const { q } = req.params.q || ''
+  const searchQuery = q.trim()
+
+  if (searchQuery.length < 2) {
+    return res.status(400).json({
+      message: 'Search query must be at least 2 characters long',
+    })
+  }
+
+  const { limit, page } = getPaginationQueryParams(req.query)
+}
+
 module.exports = {
   show,
-  index
+  index,
+  search,
 }
