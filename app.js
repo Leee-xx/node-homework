@@ -4,6 +4,7 @@ const prisma = require('./db/prisma')
 // Routes
 const userRouter = require('./routes/userRoutes')
 const taskRouter = require('./routes/taskRoutes')
+const analyticsRouter = require('./routes/analyticsRoutes')
 
 // Middleware
 const authMiddleware = require('./middleware/auth')
@@ -37,6 +38,7 @@ app.get('/health', async (req, res) => {
 })
 app.use('/api/users', userRouter)
 app.use('/api/tasks', authMiddleware, taskRouter)
+app.use('/api/analytics', analyticsRouter)
 
 app.use(notFoundHandler)
 app.use(errorHandler)

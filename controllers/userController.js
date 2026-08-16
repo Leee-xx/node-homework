@@ -29,23 +29,56 @@ async function register(req, res, next) {
   let user = null
 
   try {
-    user = await prisma.user.create({
-      data: { name: value.name, email: value.email, hashedPassword },
-      select: { name: true, email: true, id: true },
+    const result = await prisma.$transaction(async (tx) => {
+      const newUser = await tx.user.create({
+        data: { name: value.name, email: value.email, hashedPassword },
+        select: { name: true, email: true, id: true },
+      })
+
+      const welcomeTaskData = [
+        { title: 'Complete your profile', userId: newUser.id, priority: 'medium' },
+        { title: 'Add your first task', userId: newUser.id, priority: 'high' },
+        { title: 'Explore the app', userId: newUser.id, priority: 'low' }
+      ];
+
+      await tx.task.createMany({ data: welcomeTaskData })
+
+      const welcomeTasks = await tx.task.findMany({
+        where: {
+          userId: newUser.id,
+          title: { in: welcomeTaskData.map(t => t.title) },
+        },
+        select: {
+          id: true,
+          title: true,
+          isCompleted: true,
+          userId: true,
+          priority: true,
+        },
+      })
+
+      return { user: newUser, welcomeTasks }
     })
+
+    const { user, welcomeTasks } = result
+    global.user_id = user.id
+
+    res.status(201).json({
+      user,
+      welcomeTasks,
+      transactionStatus: 'success',
+    })
+    return
   } catch (e) {
-    if (e.name === 'PrismaClientKnownRequestError' && e.code === 'P2002') {
+    if (err.code === "P2002") {
       return res.status(400).json({
-        message: 'Account with this email already exists',
+        message: 'Email already registered',
       })
     } else {
       return next(e)
     }
   }
 
-  global.user_id = user.id
-
-  res.status(201).json({ email: user.email, name: user.name })
 }
 
 async function logon(req, res) {
@@ -79,6 +112,46 @@ async function logon(req, res) {
   res.status(200).json(sanitizedUser)
 }
 
+async function show(req, res) {
+  const userId = parseInt(req.params.id)
+
+  if (isNaN(userId)) {
+    return res.status(400).json({
+      message: 'Invalid user ID',
+    })
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      createdAt: true,
+      Task: {
+        where: { isCompleted: false },
+        select: {
+          id: true,
+          priority: true,
+          title: true,
+          isCompleted: true,
+          createdAt: true,
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+      },
+    },
+  })
+
+  if (!user) {
+    return res.status(404).json({
+      message: 'User not found',
+    })
+  }
+
+  res.status(200).json(user)
+}
+
 function logoff(req, res) {
   global.user_id = null
 
@@ -100,4 +173,9 @@ async function comparePassword(inputPassword, storedHash) {
   return crypto.timingSafeEqual(keyBuffer, derivedKey)
 }
 
-module.exports = { register, logon, logoff }
+module.exports = {
+  register,
+  logon,
+  show,
+  logoff,
+}
