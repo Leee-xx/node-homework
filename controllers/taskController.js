@@ -58,7 +58,18 @@ async function index(req, res) {
   } = req.query
 
 
-  const { page, limit } = getPaginationQueryParams(req.query)
+  let page
+  let limit
+  try {
+    const params = getPaginationQueryParams(req.query)
+    page = params.page
+    limit = params.limit
+  } catch (err) {
+    return res.status(400).json({
+      message: err.message,
+    })
+  }
+
   const whereClause = { userId: global.user_id }
 
   if (find) {

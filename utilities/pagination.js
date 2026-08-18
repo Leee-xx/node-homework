@@ -1,8 +1,11 @@
-function getPaginationQueryParams(query) {
-  const page = query.page || 1
-  const limit = query.limit || 10
+const { paginateSchema } = require('../validation/paginateSchema')
 
-  return { page, limit }
+function getPaginationQueryParams(query) {
+  const { value, error } = paginateSchema.validate(query)
+
+  if (error) throw error
+
+  return value
 }
 
 function paginate(query, totalCount) {

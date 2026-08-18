@@ -26,8 +26,6 @@ async function register(req, res, next) {
 
   const hashedPassword = await hashPassword(value.password)
 
-  let user = null
-
   try {
     const result = await prisma.$transaction(async (tx) => {
       const newUser = await tx.user.create({

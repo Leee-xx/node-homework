@@ -5,12 +5,22 @@ const {
   getPaginationSkip,
 } = require('../utilities/pagination')
 
-async function show(req, res) {
+async function getUserAnalytics(req, res) {
   const userId = parseInt(req.params.id)
 
   if (isNaN(userId)) {
     return res.status(400).json({
       message: 'Invalid user ID',
+    })
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  })
+
+  if (!user) {
+    return res.status(404).json({
+      message: 'User not found',
     })
   }
 
@@ -60,8 +70,18 @@ async function show(req, res) {
   })
 }
 
-async function index(req, res) {
-  const { page, limit } = getPaginationQueryParams(req.query)
+async function getUsersWithStats(req, res) {
+  let page
+  let limit
+  try {
+    const params = getPaginationQueryParams(req.query)
+    page = params.page
+    limit = params.limit
+  } catch (err) {
+    return res.status(400).json({
+      message: err.message,
+    })
+  }
 
   const usersRaw = await prisma.user.findMany({
     include: {
@@ -98,8 +118,8 @@ async function index(req, res) {
   })
 }
 
-async function search(req, res) {
-  const { q } = req.params.q || ''
+async function searchTasks(req, res) {
+  const q = req.query.q || ''
   const searchQuery = q.trim()
 
   if (searchQuery.length < 2) {
@@ -108,11 +128,45 @@ async function search(req, res) {
     })
   }
 
-  const { limit, page } = getPaginationQueryParams(req.query)
+  const { limit } = getPaginationQueryParams(req.query)
+
+  const searchPattern = `%${searchQuery}%`
+  const exactMatch = searchQuery
+  const startsWith = `${searchQuery}%`
+
+  const searchResults = await prisma.$queryRaw`
+    SELECT
+      t.id,
+      t.title,
+      t.is_completed as "isCompleted",
+      t.priority,
+      t.created_at as "createdAt",
+      t.user_id as "userId",
+      u.name as "user_name"
+    FROM tasks t
+    JOIN users u ON t.user_id = u.id
+    WHERE t.title ILIKE ${searchPattern}
+       OR u.name ILIKE ${searchPattern}
+    ORDER BY
+      CASE
+        WHEN t.title ILIKE ${exactMatch} THEN 1
+        WHEN t.title ILIKE ${startsWith} THEN 2
+        WHEN t.title ILIKE ${searchPattern} THEN 3
+        ELSE 4
+      END,
+      t.created_at DESC
+    LIMIT ${parseInt(limit)}
+  `
+
+  res.status(200).json({
+    results: searchResults,
+    query: searchQuery,
+    count: searchResults.length,
+  })
 }
 
 module.exports = {
-  show,
-  index,
-  search,
+  getUserAnalytics,
+  getUsersWithStats,
+  searchTasks,
 }

@@ -1,9 +1,14 @@
 const express = require('express')
-const { show, index } = require('../controllers/analyticsController')
+const {
+  getUserAnalytics,
+  getUsersWithStats,
+  searchTasks,
+} = require('../controllers/analyticsController')
 
 const router = express.Router()
 
-router.get('/users', index)
-router.get('/users/:id', show)
+router.get('/users', getUsersWithStats)
+router.get('/users/:id', getUserAnalytics)
+router.get('/tasks/search', searchTasks)
 
 module.exports = router
