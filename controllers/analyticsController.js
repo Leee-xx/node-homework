@@ -131,7 +131,7 @@ async function searchTasks(req, res) {
   let limit
   try {
     const params = getPaginationQueryParams(req.query)
-    limit = params
+    limit = params.limit
   } catch (err) {
     return res.status(400).json({
       message: err.message,

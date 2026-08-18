@@ -11,10 +11,10 @@ const {
 const router = express.Router()
 
 router.get('/', index)
+router.post('/bulk', bulkCreate)
 router.get('/:id', show)
 router.post('/', create)
 router.patch('/:id', update)
 router.delete('/:id', deleteTask)
-router.post('/bulk', bulkCreate)
 
 module.exports = router

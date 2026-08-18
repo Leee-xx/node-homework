@@ -109,12 +109,6 @@ async function index(req, res) {
           email: true,
         },
       },
-      User: {
-        select: {
-          name: true,
-          email: true,
-        },
-      },
     },
     take: limit,
     skip: getPaginationSkip(page, limit),
