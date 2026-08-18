@@ -154,6 +154,12 @@ async function show(req, res, next) {
         id: true,
         title: true,
         isCompleted: true,
+        User: {
+          select: {
+            name: true,
+            email: true,
+          }
+        },
       },
     })
 
@@ -197,13 +203,18 @@ async function update(req, res, next) {
         id: taskId,
         userId: global.user_id,
       },
-      select: { title: true, isCompleted: true, id: true }
+      select: {
+        title: true,
+        isCompleted: true,
+        id: true,
+        priority: true,
+      }
     });
 
     res.status(200).json(task)
   } catch (err) {
     if (err.code === 'P2025' ) {
-      return res.status(404).json({ message: "The task was not found."})
+      return res.status(404).json({ message: 'The task was not found.'})
     } else {
       return next(err)
     }
@@ -249,21 +260,23 @@ async function bulkCreate(req, res, next) {
   }
 
   const validTasks = []
-  for (const task in tasks) {
-    const { error, value } = taskSchema.validate(task)
+  try {
+    tasks.forEach((task) => {
+      const { error, value } = taskSchema.validate(task)
 
-    if (error) {
-      return res.status(400).json({
-        message: 'Validation failed',
-        details: error.details,
+      if (error) throw error
+
+      validTasks.push({
+        title: value.title,
+        isCompleted: value.isCompleted,
+        priority: value.priority,
+        userId: global.user_id,
       })
-    }
-
-    validTasks.push({
-      title: value.title,
-      isCompleted: value.isCompleted || false,
-      priority: value.priority || 'medium',
-      userId: global.user_id,
+    })
+  } catch (err) {
+    return res.status(400).json({
+      message: 'Validation failed',
+      details: err.details,
     })
   }
 
@@ -273,7 +286,7 @@ async function bulkCreate(req, res, next) {
       skipDuplicates: false,
     })
 
-    res.statu(201).json({
+    res.status(201).json({
       message: 'success!',
       tasksCreated: result.count,
       totalRequested: validTasks.length,

@@ -128,7 +128,15 @@ async function searchTasks(req, res) {
     })
   }
 
-  const { limit } = getPaginationQueryParams(req.query)
+  let limit
+  try {
+    const params = getPaginationQueryParams(req.query)
+    limit = params
+  } catch (err) {
+    return res.status(400).json({
+      message: err.message,
+    })
+  }
 
   const searchPattern = `%${searchQuery}%`
   const exactMatch = searchQuery

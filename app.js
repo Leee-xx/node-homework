@@ -38,7 +38,7 @@ app.get('/health', async (req, res) => {
 })
 app.use('/api/users', userRouter)
 app.use('/api/tasks', authMiddleware, taskRouter)
-app.use('/api/analytics', analyticsRouter)
+app.use('/api/analytics', authMiddleware, analyticsRouter)
 
 app.use(notFoundHandler)
 app.use(errorHandler)

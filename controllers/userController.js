@@ -67,13 +67,13 @@ async function register(req, res, next) {
       transactionStatus: 'success',
     })
     return
-  } catch (e) {
+  } catch (err) {
     if (err.code === "P2002") {
       return res.status(400).json({
         message: 'Email already registered',
       })
     } else {
-      return next(e)
+      return next(err)
     }
   }
 

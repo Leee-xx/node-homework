@@ -1,7 +1,8 @@
 const { paginateSchema } = require('../validation/paginateSchema')
 
 function getPaginationQueryParams(query) {
-  const { value, error } = paginateSchema.validate(query)
+  const { limit, page } = query
+  const { value, error } = paginateSchema.validate({ limit, page })
 
   if (error) throw error
 
