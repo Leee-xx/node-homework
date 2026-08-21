@@ -14,6 +14,10 @@ const errorHandler = require('./middleware/error-handler')
 const port = process.env.PORT || 3000
 
 const app = express()
+app.set('trust proxy', 1)
+const helmet = require('helmet')
+const { xss } = require('express-xss-sanitizer')
+const rateLimiter = require('express-rate-limit')
 
 app.use(express.json())
 app.use(cookieParser())
