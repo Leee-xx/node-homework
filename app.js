@@ -1,5 +1,6 @@
 const express = require('express')
 const prisma = require('./db/prisma')
+const cookieParser = require('cookie-parser')
 
 // Routes
 const userRouter = require('./routes/userRoutes')
@@ -15,6 +16,7 @@ const port = process.env.PORT || 3000
 const app = express()
 
 app.use(express.json())
+app.use(cookieParser())
 
 // Routes
 app.get('/health', async (req, res) => {
@@ -33,6 +35,7 @@ app.use('/api/users', userRouter)
 app.use('/api/tasks', taskRouter)
 app.use('/api/analytics', analyticsRouter)
 
+// Error-handling middlewares
 app.use(notFoundHandler)
 app.use(errorHandler)
 

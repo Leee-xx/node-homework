@@ -9,7 +9,7 @@ const {
 async function create(req, res, next) {
   if (!req.body) req.body = {}
 
-  if (!global.user_id) {
+  if (!req.user.id) {
     return res.status(401).json({
       message: 'Unauthorized'
     })
@@ -32,7 +32,7 @@ async function create(req, res, next) {
   let task = null
   try {
     task = await prisma.task.create({
-      data: { ...value, userId: global.user_id },
+      data: { ...value, userId: req.user.id },
       select: { id: true, title: true, isCompleted: true, priority: true },
     })
   } catch (err) {
@@ -70,7 +70,7 @@ async function index(req, res) {
     })
   }
 
-  const whereClause = { userId: global.user_id }
+  const whereClause = { userId: req.user.id }
 
   if (find) {
     whereClause.title = {
@@ -142,7 +142,7 @@ async function show(req, res, next) {
     const task = await prisma.task.findUnique({
       where: {
         id: taskId,
-        userId: global.user_id,
+        userId: req.user.id,
       },
       select: {
         id: true,
@@ -195,7 +195,7 @@ async function update(req, res, next) {
       data: value,
       where: {
         id: taskId,
-        userId: global.user_id,
+        userId: req.user.id,
       },
       select: {
         title: true,
@@ -223,7 +223,7 @@ async function deleteTask(req, res, next) {
     const task = await prisma.task.delete({
       where: {
         id: taskId,
-        userId: global.user_id,
+        userId: req.user.id,
       },
       select: { title: true, isCompleted: true, id: true }
     })
@@ -264,7 +264,7 @@ async function bulkCreate(req, res, next) {
         title: value.title,
         isCompleted: value.isCompleted,
         priority: value.priority,
-        userId: global.user_id,
+        userId: req.user.id,
       })
     })
   } catch (err) {

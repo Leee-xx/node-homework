@@ -86,12 +86,13 @@ async function register(req, res, next) {
       return { user: newUser, welcomeTasks, csrfToken }
     })
 
-    const { user, welcomeTasks } = result
+    const { user, welcomeTasks, csrfToken } = result
 
     res.status(201).json({
       user,
       welcomeTasks,
       transactionStatus: 'success',
+      csrfToken,
     })
     return
   } catch (err) {
@@ -179,7 +180,7 @@ async function show(req, res) {
 
 function logoff(req, res) {
   res.clearCookie('jwt', cookieFlags(req))
-  res.status(200)
+  res.status(200).end()
 }
 
 async function hashPassword(password) {
