@@ -135,7 +135,7 @@ async function logon(req, res) {
   const { hashed_password, ...sanitizedUser } = user
   const csrfToken = setJwtCookie(req, res, user)
 
-  res.status(200).json({ user: sanitizedUser, csrfToken })
+  res.status(200).json({ ...sanitizedUser, csrfToken })
 }
 
 async function show(req, res) {
