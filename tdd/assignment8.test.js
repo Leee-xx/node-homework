@@ -228,10 +228,12 @@ describe("testing task creation", () => {
     try {
       await waitForRouteHandlerCompletion(create, req, saveRes);
     } catch (e) {
+      console.log('hello')
       expect(e.name).toBe("TypeError");
     }
   });
   it("You can't create a task with a bogus user id.", async () => {
+    console.log("BOGUS")
     expect.assertions(1);
     const req = httpMocks.createRequest({
       method: "POST",
@@ -240,8 +242,11 @@ describe("testing task creation", () => {
     req.user = { id: 72348 };
     saveRes = httpMocks.createResponse({ eventEmitter: EventEmitter });
     try {
+      console.log('trying')
       await waitForRouteHandlerCompletion(create, req, saveRes);
+      console.log('tried')
     } catch (e) {
+      console.log(e)
       expect(e.name).toBe("PrismaClientKnownRequestError");
     }
   });
