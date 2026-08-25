@@ -228,7 +228,7 @@ describe("testing task creation", () => {
     try {
       await waitForRouteHandlerCompletion(create, req, saveRes);
     } catch (e) {
-      console.log('hello')
+      console.log(`status code good test: ${saveRes.statusCode}`)
       expect(e.name).toBe("TypeError");
     }
   });
@@ -246,8 +246,9 @@ describe("testing task creation", () => {
       await waitForRouteHandlerCompletion(create, req, saveRes);
       console.log('tried')
     } catch (e) {
-      console.log(e)
+      console.log('catch block:', e)
       expect(e.name).toBe("PrismaClientKnownRequestError");
+      console.log(`status code: ${saveRes.statusCode}`)
     }
   });
   it("If you have a valid user id, create() succeeds (res.statusCode should be 201).", async () => {

@@ -37,14 +37,7 @@ async function create(req, res, next) {
       select: { id: true, title: true, isCompleted: true, priority: true },
     })
   } catch (err) {
-    if (err.name === 'PrismaClientKnownRequestError' && err.code === 'P2003') {
-      console.log('2003 err:', err)
-      return res.status(400).json({
-        message: 'You need to be logged in to create a new task',
-      })
-    } else {
-      return next(err)
-    }
+    return next(err)
   }
 
   res.status(201).json(task)
