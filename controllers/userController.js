@@ -2,8 +2,35 @@ const crypto = require('crypto')
 const util = require('util')
 const scrypt = util.promisify(crypto.scrypt)
 const prisma = require('../db/prisma')
+const jwt = require('jsonwebtoken')
 
 const { userSchema } = require('../validation/userSchema')
+
+const cookieFlags = (req) => {
+  return {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'Strict',
+  }
+}
+const setJwtCookie = (req, res, user) => {
+  const payload = { id: user.id, csrfToken: crypto.randomUUID() }
+  const token = jwt.sign(
+    payload,
+    process.env.JWT_SECRET,
+    { expiresIn: '1h' },
+  )
+
+  res.cookie('jwt',
+    token,
+    {
+      ...cookieFlags(req),
+      maxAge: 60 * 60 * 1000,
+    },
+  )
+
+  return payload.csrfToken
+}
 
 async function register(req, res, next) {
   if (!req.body) req.body = {}
@@ -55,16 +82,17 @@ async function register(req, res, next) {
         },
       })
 
-      return { user: newUser, welcomeTasks }
+      const csrfToken = setJwtCookie(req, res, newUser)
+      return { user: newUser, welcomeTasks, csrfToken }
     })
 
-    const { user, welcomeTasks } = result
-    global.user_id = user.id
+    const { user, welcomeTasks, csrfToken } = result
 
     res.status(201).json({
       user,
       welcomeTasks,
       transactionStatus: 'success',
+      csrfToken,
     })
     return
   } catch (err) {
@@ -104,10 +132,10 @@ async function logon(req, res) {
     })
   }
 
-  global.user_id = user.id
-
   const { hashed_password, ...sanitizedUser } = user
-  res.status(200).json(sanitizedUser)
+  const csrfToken = setJwtCookie(req, res, user)
+
+  res.status(200).json({ ...sanitizedUser, csrfToken })
 }
 
 async function show(req, res) {
@@ -151,9 +179,8 @@ async function show(req, res) {
 }
 
 function logoff(req, res) {
-  global.user_id = null
-
-  res.status(200)
+  res.clearCookie('jwt', cookieFlags(req))
+  res.status(200).end()
 }
 
 async function hashPassword(password) {

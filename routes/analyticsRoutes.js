@@ -4,8 +4,11 @@ const {
   getUsersWithStats,
   searchTasks,
 } = require('../controllers/analyticsController')
+const jwtMiddleware = require('../middleware/jwtMiddleware')
 
 const router = express.Router()
+
+router.use(jwtMiddleware)
 
 router.get('/users', getUsersWithStats)
 router.get('/users/:id', getUserAnalytics)

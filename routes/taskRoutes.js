@@ -7,8 +7,11 @@ const {
   deleteTask,
   bulkCreate,
 } = require('../controllers/taskController')
+const jwtMiddleware = require('../middleware/jwtMiddleware')
 
 const router = express.Router()
+
+router.use(jwtMiddleware)
 
 router.get('/', index)
 router.post('/bulk', bulkCreate)
