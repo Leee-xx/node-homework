@@ -23,7 +23,6 @@ async function create(req, res, next) {
   )
 
   if (error) {
-    console.log("validation error")
     return res.status(400).json({
       message: error.message,
       details: error.details,
