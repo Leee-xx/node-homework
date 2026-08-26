@@ -86,7 +86,7 @@ async function index(req, res) {
   }
   if (max_date) {
     whereClause.createdAt ||= {}
-    whereClause.createdAt.lte(new Date(max_date))
+    whereClause.createdAt.lte = new Date(max_date)
   }
 
   const tasks = await prisma.task.findMany({
