@@ -128,7 +128,6 @@ describe('task object validation tests', () => {
     const { value, error } = taskSchema.validate(
       {
         title,
-        priority,
         isCompleted: true,
       },
       { abortEarly: false },
@@ -140,11 +139,25 @@ describe('task object validation tests', () => {
 })
 
 describe('patchTask object validation tests', () => {
-  const validatePatchTaskParams = (params) => validateSchemaParams(patchTaskSchema, params)
-
   it('12. The patchTaskSchema does not require a title.', () => {
+    const { value, error } = patchTaskSchema.validate(
+      {
+        isCompleted,
+      },
+      { abortEarly: false },
+    )
+
+    expect(error).toBeFalsy()
   })
 
   it('13. If no value is provided for isCompleted this remains undefined in the returned value.', () => {
+    const { value, error } = patchTaskSchema.validate(
+      {
+        title,
+      },
+      { abortEarly: false },
+    )
+
+    expect(value.isCompleted).toBeUndefined()
   })
 })
