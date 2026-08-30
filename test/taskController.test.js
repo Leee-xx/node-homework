@@ -20,7 +20,7 @@ let saveData = null
 let saveTaskId = null
 let validTitle = 'some title'
 
-const createResponse = () => httpMocks.createResponse({ eventEmitter: EventEmitter }) 
+const createResponse = () => httpMocks.createResponse({ eventEmitter: EventEmitter })
 
 beforeAll(async () => {
   await prisma.Task.deleteMany()
@@ -111,8 +111,6 @@ describe('testing task creation', () => {
 
 describe('test getting created tasks', () => {
   it("20. You can't get a list of tasks without a user id.", async () => {
-    expect.assertions(1)
-
     const req = httpMocks.createRequest({
       method: 'GET',
     })
@@ -125,5 +123,62 @@ describe('test getting created tasks', () => {
   })
 
   it("21. If you use user1's id, the call returns a 200 status.", async () => {
+    const req = httpMocks.createRequest({
+      method: 'GET',
+    })
+    req.user = user1
+
+    saveRes = createResponse()
+
+    await waitForRouteHandlerCompletion(index, req, saveRes)
+    expect(saveRes.statusCode).toBe(200)
+  })
+
+  it('22. The returned object has a tasks array of length 1.', () => {
+    saveData = saveRes._getJSONData()
+    expect(saveData.tasks.length).toBe(1)
+  })
+
+  it('23. The title in the first array object is as expected.', () => {
+    expect(saveData.tasks[0].title).toBe(validTitle)
+  })
+
+  it('24. The first array object does not contain a userId.', () => {
+    expect(saveData.tasks[0].userId).toBeUndefined()
+  })
+
+  it('25. If you get the list of tasks using the userId from user2, you get a 404.', async () => {
+    const req = httpMocks.createRequest({
+      method: 'GET',
+    })
+    req.user = user2
+
+    saveRes = createResponse()
+
+    expect.assertions(1)
+    await waitForRouteHandlerCompletion(index, req, saveRes)
+    expect(saveRes.statusCode).toBe(404)
+  })
+
+  it('26. You can retrieve the created task using show().', async () => {
+    const req = httpMocks.createRequest({
+      method: 'GET',
+    })
+    req.params = { id: saveTaskId.toString() }
+    req.user = user1
+
+    await waitForRouteHandlerCompletion(show, req, saveRes)
+    expect(saveRes.statusCode).toBe(200)
+  })
+
+  it("27. User2 can't retrieve this task entry. You should get a 404.", async () => {
+    const req = httpMocks.createRequest({
+      method: 'GET',
+    })
+    req.params = { id: saveTaskId.toString() }
+    req.user = user2
+
+    await waitForRouteHandlerCompletion(show, req, saveRes)
+    expect(saveRes.statusCode).toBe(200)
   })
 })
