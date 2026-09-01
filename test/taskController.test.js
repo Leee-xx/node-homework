@@ -167,6 +167,8 @@ describe('test getting created tasks', () => {
     req.params = { id: saveTaskId.toString() }
     req.user = user1
 
+    saveRes = createResponse()
+
     await waitForRouteHandlerCompletion(show, req, saveRes)
     expect(saveRes.statusCode).toBe(200)
   })
@@ -178,7 +180,84 @@ describe('test getting created tasks', () => {
     req.params = { id: saveTaskId.toString() }
     req.user = user2
 
+    saveRes = createResponse()
+
     await waitForRouteHandlerCompletion(show, req, saveRes)
+    expect(saveRes.statusCode).toBe(404)
+  })
+
+  it('28. User1 can set the task corresponding to saveTaskId to isCompleted: true.', async () => {
+    const req = httpMocks.createRequest({
+      method: 'PATCH',
+    })
+    req.params = { id: saveTaskId.toString() }
+    req.body = { isCompleted: true }
+    req.user = user1
+
+    saveRes = createResponse()
+    await waitForRouteHandlerCompletion(update, req, saveRes)
+    saveData = saveRes._getJSONData()
+    expect(saveData.isCompleted).toBe(true)
+  })
+
+  it("29. User2 can't do this.", async () => {
+    const req = httpMocks.createRequest({
+      method: 'PATCH',
+    })
+    req.params = { id: saveTaskId.toString() }
+    req.body = { isCompleted: true }
+    req.user = user2
+
+    saveRes = createResponse()
+
+    expect.assertions(1)
+    try {
+      await waitForRouteHandlerCompletion(update, req, saveRes)
+    } catch (err) {
+      expect(err.name).toBe('PrismaClientKnownRequestError')
+    }
+  })
+
+  it("30. User2 can't delete this task.", async () => {
+    const req = httpMocks.createRequest({
+      method: 'DELETE',
+    })
+    req.params = { id: saveTaskId.toString() }
+    req.user = user2
+
+    saveRes = createResponse()
+
+    expect.assertions(1)
+    try {
+      await waitForRouteHandlerCompletion(deleteTask, req, saveRes)
+    } catch (err) {
+      expect(err.name).toBe('PrismaClientKnownRequestError')
+    }
+  })
+
+  it('31. User1 can delete this task.', async () => {
+    const req = httpMocks.createRequest({
+      method: 'DELETE',
+    })
+    req.params = { id: saveTaskId.toString() }
+    req.user = user1
+
+    saveRes = createResponse()
+
+    await waitForRouteHandlerCompletion(deleteTask, req, saveRes)
     expect(saveRes.statusCode).toBe(200)
+  })
+
+  it("32. Retrieving user1's tasks now returns a 404.", async () => {
+    const req = httpMocks.createRequest({
+      method: 'GET',
+    })
+    req.params = { id: saveTaskId.toString() }
+    req.user = user1
+
+    saveRes = createResponse()
+
+    await waitForRouteHandlerCompletion(show, req, saveRes)
+    expect(saveRes.statusCode).toBe(404)
   })
 })
