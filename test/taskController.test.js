@@ -26,7 +26,7 @@ beforeAll(async () => {
   await prisma.Task.deleteMany()
   await prisma.User.deleteMany()
 
-  user1 = await prisma.user.create({
+  user1 = await prisma.User.create({
     data: {
       name: 'Bob',
       email: 'bob@sample.com',
@@ -34,7 +34,7 @@ beforeAll(async () => {
     },
   })
 
-  user2 = await prisma.user.create({
+  user2 = await prisma.User.create({
     data: {
       name: 'Alice',
       email: 'alice@sample.com',

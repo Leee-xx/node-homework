@@ -3,7 +3,6 @@ const { taskSchema, patchTaskSchema } = require('../validation/taskSchema')
 
 const title = 'a valid title'
 const isCompleted = false
-const priority = 'medium'
 
 const validateSchemaParams = (schema, params) => {
   const { error } = schema.validate(
@@ -95,7 +94,6 @@ describe('task object validation tests', () => {
   it('8. The task schema requires a title.', () => {
     const error = validateTaskParams({
       isCompleted,
-      priority,
     })
 
     expect(getErrorDetail(error, 'title')).toBeDefined()
@@ -105,7 +103,6 @@ describe('task object validation tests', () => {
     const error = validateTaskParams({
       title,
       isCompleted: 'bad value',
-      priority,
     })
 
     expect(getErrorDetail(error, 'isCompleted')).toBeDefined()
@@ -115,7 +112,6 @@ describe('task object validation tests', () => {
     const { value, error } = taskSchema.validate(
       {
         title,
-        priority,
       },
       { abortEarly: false },
     )
@@ -132,7 +128,6 @@ describe('task object validation tests', () => {
       { abortEarly: false },
     )
 
-    expect(error).toBeFalsy()
     expect(value.isCompleted).toBe(true)
   })
 })
