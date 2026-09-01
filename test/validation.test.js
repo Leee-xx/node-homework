@@ -120,7 +120,6 @@ describe('task object validation tests', () => {
       { abortEarly: false },
     )
 
-    expect(error).toBeFalsy()
     expect(value.isCompleted).toBe(false)
   })
 

@@ -212,7 +212,11 @@ async function update(req, res, next) {
 
     res.status(200).json(task)
   } catch (err) {
-    return next(err)
+    if (err.code === 'P2025' ) {
+      return res.status(404).json({ message: 'The task was not found.'})
+    } else {
+      return next(err)
+    }
   }
 }
 
@@ -231,7 +235,11 @@ async function deleteTask(req, res, next) {
 
     res.status(200).json(task)
   } catch (err) {
-    return next(err)
+    if (err.code === 'P2025' ) {
+      return res.status(404).json({ message: 'The task was not found.'})
+    } else {
+      return next(err)
+    }
   }
 }
 

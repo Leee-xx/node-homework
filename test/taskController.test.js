@@ -114,7 +114,6 @@ describe('test getting created tasks', () => {
     const req = httpMocks.createRequest({
       method: 'GET',
     })
-    req.user = {}
 
     saveRes = createResponse()
 
@@ -210,12 +209,8 @@ describe('test getting created tasks', () => {
 
     saveRes = createResponse()
 
-    expect.assertions(1)
-    try {
-      await waitForRouteHandlerCompletion(update, req, saveRes)
-    } catch (err) {
-      expect(err.name).toBe('PrismaClientKnownRequestError')
-    }
+    await waitForRouteHandlerCompletion(update, req, saveRes)
+    expect(saveRes.statusCode).toBe(404)
   })
 
   it("30. User2 can't delete this task.", async () => {
@@ -227,12 +222,8 @@ describe('test getting created tasks', () => {
 
     saveRes = createResponse()
 
-    expect.assertions(1)
-    try {
-      await waitForRouteHandlerCompletion(deleteTask, req, saveRes)
-    } catch (err) {
-      expect(err.name).toBe('PrismaClientKnownRequestError')
-    }
+    await waitForRouteHandlerCompletion(deleteTask, req, saveRes)
+    expect(saveRes.statusCode).toBe(404)
   })
 
   it('31. User1 can delete this task.', async () => {
