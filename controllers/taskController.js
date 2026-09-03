@@ -42,7 +42,11 @@ async function create(req, res, next) {
   res.status(201).json(task)
 }
 
-async function index(req, res) {
+async function index(req, res, next) {
+  if (!req.user?.id) {
+    return res.status(401).json({ message: 'Unauthorized' })
+  }
+
   let {
     find,
     isCompleted,
@@ -89,42 +93,45 @@ async function index(req, res) {
     whereClause.createdAt.lte = new Date(max_date)
   }
 
-  const tasks = await prisma.task.findMany({
-    where: whereClause,
-    select: {
-      title: true,
-      isCompleted: true,
-      id: true,
-      priority: true,
-      createdAt: true,
-      User: {
-        select: {
-          name: true,
-          email: true,
+  try {
+    const tasks = await prisma.task.findMany({
+      where: whereClause,
+      select: {
+        title: true,
+        isCompleted: true,
+        id: true,
+        priority: true,
+        createdAt: true,
+        User: {
+          select: {
+            name: true,
+            email: true,
+          },
         },
       },
-    },
-    take: limit,
-    skip: getPaginationSkip(page, limit),
-    orderBy: getOrderBy(req.query),
-  })
-
-  if (tasks.length === 0) {
-    return res.status(404).json({
-      message: 'No tasks found.',
+      take: limit,
+      skip: getPaginationSkip(page, limit),
+      orderBy: getOrderBy(req.query),
     })
+    if (tasks.length === 0) {
+      return res.status(404).json({
+        message: 'No tasks found.',
+      })
+    }
+
+    const taskCount = await prisma.task.count({
+      where: whereClause,
+    })
+
+    const pagination = paginate(req.query, taskCount)
+
+    res.status(200).json({
+      tasks,
+      pagination,
+    })
+  } catch (err) {
+    next(err)
   }
-
-  const taskCount = await prisma.task.count({
-    where: whereClause,
-  })
-
-  const pagination = paginate(req.query, taskCount)
-
-  res.status(200).json({
-    tasks,
-    pagination,
-  })
 }
 
 async function show(req, res, next) {
@@ -151,7 +158,11 @@ async function show(req, res, next) {
       },
     })
 
-    res.status(200).json(task)
+    if (task) {
+      res.status(200).json(task)
+    } else {
+      return res.status(404).json({ message: 'The task was not found.'})
+    }
   } catch (err) {
     if (err.code === 'P2025') {
       return res.status(404).json({ message: 'The task was not found.'})
@@ -225,7 +236,7 @@ async function deleteTask(req, res, next) {
     res.status(200).json(task)
   } catch (err) {
     if (err.code === 'P2025' ) {
-      return res.status(404).json({ message: "The task was not found."})
+      return res.status(404).json({ message: 'The task was not found.'})
     } else {
       return next(err)
     }
