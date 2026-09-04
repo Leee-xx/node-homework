@@ -1,0 +1,465 @@
+type: collection.insomnia.rest/5.0
+schema_version: "5.1"
+name: CTD Node
+meta:
+  id: wrk_76756c2d9c0b4a9b9b87f68cfd5e95e9
+  created: 1783463159608
+  modified: 1783463159608
+  description: ""
+collection:
+  - url: http://localhost:3000/echo
+    name: express echo
+    meta:
+      id: req_fff5f21b7eaf44c9af3907ceb7bbd937
+      created: 1783463368081
+      modified: 1783463780040
+      isPrivate: false
+      description: ""
+      sortKey: -1783463368081
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"message": "Hello"
+        }
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: User-Agent
+        value: insomnia/12.6.0
+        description: ""
+        disabled: false
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - name: users
+    meta:
+      id: fld_aeab513f729d40e19125aa7636496005
+      created: 1786048667180
+      modified: 1788549670055
+      sortKey: -1786048667180
+      description: ""
+    children:
+      - url: "{{ _.hostname }}/api/users/logon"
+        name: logon
+        meta:
+          id: req_1aaff75e8f7c4f5aa2797e7b1c33e949
+          created: 1786048670021
+          modified: 1787337656595
+          isPrivate: false
+          description: ""
+          sortKey: -1786048673616
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"email": "test+1763857127746@example.com",
+            	"password": "Test1234!"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+        scripts:
+          afterResponse: |-
+            const resp = insomnia.response.json()
+            insomnia.environment.set('csrfToken', resp.csrfToken)
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.hostname }}/api/users/register"
+        name: register
+        meta:
+          id: req_ec704eabba344e528ab99d9736c653a9
+          created: 1786049750384
+          modified: 1788549667021
+          isPrivate: false
+          description: ""
+          sortKey: -1786048673716
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"email": "test+{% faker 'timestamp' %}@example.com",
+            	"name": "Test User",
+            	"password": "Test1234!"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+          - name: X-Recaptcha-Test
+            value: ad6f1d57240ee7de8c438d5b093ab2d6a871f7111d2a9952f61e7ddb61aee99d
+            description: ""
+            disabled: false
+        scripts:
+          afterResponse: |-
+            const cookies = insomnia.response.cookies.toObject()
+            console.log(cookies)
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.hostname }}/api/users/register"
+        name: register - already registered
+        meta:
+          id: req_0a87dddeedc14462ac0bec19ca9ecd42
+          created: 1786129490112
+          modified: 1786129514741
+          isPrivate: false
+          description: ""
+          sortKey: -1786048673666
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"email": "test+1763857127746@example.com",
+            	"name": "Test User",
+            	"password": "Test1234!"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.hostname }}/api/users/2"
+        name: show
+        meta:
+          id: req_c8457d7a383849cab5862de0d9a4d454
+          created: 1786821356299
+          modified: 1786821356299
+          isPrivate: false
+          description: ""
+          sortKey: -1786476168294.5
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.hostname }}/api/users/logoff"
+        name: logoff
+        meta:
+          id: req_9876da78d62b4773b9130f69cba1d61b
+          created: 1787335218596
+          modified: 1787336810815
+          isPrivate: false
+          description: ""
+          sortKey: -1784756020848.5
+        method: POST
+        body:
+          mimeType: application/json
+          text: ""
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+          - name: X-CSRF-TOKEN
+            value: "{{ _.csrfToken }}"
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: tasks
+    meta:
+      id: fld_b7434d1ab7824fd38879646931e42131
+      created: 1786130998933
+      modified: 1786130998933
+      sortKey: -1786130998933
+      description: ""
+    children:
+      - url: "{{ _.hostname }}/api/tasks"
+        name: index
+        meta:
+          id: req_bb760a0f51fe4e35abe92713538d14ae
+          created: 1786131011323
+          modified: 1787426580597
+          isPrivate: false
+          description: ""
+          sortKey: -1786131015540
+        method: GET
+        body:
+          mimeType: application/json
+          text: ""
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+          - name: X-CSRF-TOKEN
+            value: "{{ _.csrfToken }}"
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.hostname }}/api/tasks"
+        name: create
+        meta:
+          id: req_72d110256a144d30aae4d2454988e792
+          created: 1786131758755
+          modified: 1787426435684
+          isPrivate: false
+          description: ""
+          sortKey: -1786131015640
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"title": "{% faker 'isoTimestamp' %}"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+          - name: X-CSRF-TOKEN
+            value: "{{ _.csrfToken }}"
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.hostname }}/api/tasks/15"
+        name: update
+        meta:
+          id: req_fa28dd73866c432bb4a38738c85cf0dd
+          created: 1786132710241
+          modified: 1787429037295
+          isPrivate: false
+          description: ""
+          sortKey: -1786131015590
+        method: PATCH
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"title": "{% faker 'isoTimestamp' %}"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+          - name: X-CSRF-TOKEN
+            value: "{{ _.csrfToken }}"
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.hostname }}/api/tasks/1"
+        name: show
+        meta:
+          id: req_4223fdd366a84bb993b9172d2cc79ace
+          created: 1786133514180
+          modified: 1787426490363
+          isPrivate: false
+          description: ""
+          sortKey: -1786089844628
+        method: GET
+        body:
+          mimeType: application/json
+          text: ""
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+          - name: X-CSRF-TOKEN
+            value: "{{ _.csrfToken }}"
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.hostname }}/api/tasks/1"
+        name: delete
+        meta:
+          id: req_12183469ce8c48d4a6640f88c22aceec
+          created: 1786216082183
+          modified: 1786216103525
+          isPrivate: false
+          description: ""
+          sortKey: -1786131015565
+        method: DELETE
+        headers:
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: analytics
+    meta:
+      id: fld_5db58d47f10744818ceef217829b70bf
+      created: 1786905034454
+      modified: 1786905034454
+      sortKey: -1786905034454
+      description: ""
+    children:
+      - url: "{{ _.hostname }}/api/analytics/users/2"
+        name: show
+        meta:
+          id: req_5f4750143d02454f8773727eba70f7cc
+          created: 1786905045185
+          modified: 1786905699432
+          isPrivate: false
+          description: ""
+          sortKey: -1786905063488
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.hostname }}/api/analytics/users"
+        name: index
+        meta:
+          id: req_5f501978c3ed4775a8a82334a7201906
+          created: 1786905910022
+          modified: 1786905913701
+          isPrivate: false
+          description: ""
+          sortKey: -1786863192218.5
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_7d34e5901ec536f5760d17512c80a28f55d5699a
+    created: 1783463159617
+    modified: 1788549670038
+  cookies:
+    - id: 75e58081-e1a3-47f6-b92d-68feaacf7d07
+      key: jwt
+      value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTIsImNzcmZUb2tlbiI6IjZiYmJjMTZmLWJjMGUtNGFhMy05NDRlLTIwMmQzMGE2NmZjMiIsImlhdCI6MTc4ODU0OTY2OSwiZXhwIjoxNzg4NTUzMjY5fQ.w5K2rIBX-ov5RoxHX2-j3Mc6i33ST7_dURZA5Bqe8Gk
+      domain: localhost
+      path: /
+      secure: false
+      httpOnly: true
+      hostOnly: true
+    - id: cb08cd88-b838-4d0a-b426-1379e6e3d3f7
+      key: jwt
+      value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiY3NyZlRva2VuIjoiZmUzYmNjZWEtOWE0OS00OWYxLWI2NzItMDA2NmU0NTY0MGIwIiwiaWF0IjoxNzg3NDI5MTA3LCJleHAiOjE3ODc0MzI3MDd9.xSQ9K72NQHK1F9sB4BxMQ37VEFyagUrdmZpPB3a1BrM
+      domain: localhost
+      path: /
+      secure: false
+      httpOnly: true
+      hostOnly: true
+environments:
+  name: Base Environment
+  meta:
+    id: env_7d34e5901ec536f5760d17512c80a28f55d5699a
+    created: 1783463159615
+    modified: 1788549670047
+    isPrivate: false
+  data:
+    hostname: http://localhost:3000
+    csrfToken: fe3bccea-9a49-49f1-b672-0066e45640b0
