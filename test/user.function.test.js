@@ -26,8 +26,6 @@ describe('register a user', () => {
   const email = 'foo@bar.com'
   const password = 'Password123!'
 
-  const register = async (newUser) => await agent.post('/api/users/register').send(newUser)
-
   it('46. it creates the user entry', async () => {
     const newUser = {
       name,
@@ -35,7 +33,9 @@ describe('register a user', () => {
       password,
     }
 
-    saveRes = await register(newUser)
+    saveRes = await await agent.post('/api/users/register')
+      .set('X-Recaptcha-Test', process.env.RECAPTCHA_BYPASS)
+      .send(newUser)
     expect(saveRes.status).toBe(201)
   })
 
