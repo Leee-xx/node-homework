@@ -2,6 +2,7 @@ const express = require('express')
 const {
   register,
   logon,
+  googleLogon,
   show,
   logoff,
 } = require('../controllers/userController')
@@ -11,6 +12,7 @@ const router = express.Router()
 
 router.get('/:id', show)
 router.post('/register', register)
+router.post('/googleLogon', googleLogon)
 router.post('/logon', logon)
 
 // Protected routes

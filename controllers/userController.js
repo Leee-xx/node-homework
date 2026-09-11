@@ -4,8 +4,15 @@ const scrypt = util.promisify(crypto.scrypt)
 const prisma = require('../db/prisma')
 const jwt = require('jsonwebtoken')
 const { StatusCodes } = require('http-status-codes')
+const { OAuth2Client } = require('google-auth-library')
 
 const { userSchema } = require('../validation/userSchema')
+
+const oauthClient = new OAuth2Client({
+  clientId: process.env.OAUTH_CLIENT_ID,
+  clientSecret: process.env.OAUTH_CLIENT_SECRET,
+  redirectUri: process.env.OAUTH_REDIRECT_URI,
+})
 
 const cookieFlags = (req) => {
   return {
@@ -216,6 +223,40 @@ async function show(req, res) {
   res.status(200).json(user)
 }
 
+async function googleLogon(req, res, next) {
+  try {
+    const { code } = req.body
+
+    if (!code) {
+      return res.status(400).json({
+        message: 'No credential provided',
+      })
+    }
+    console.log(`code exists: ${code}`)
+
+    //*
+    console.log('getting token from code')
+    const { tokens } = await oauthClient.getToken(code)
+    console.log(tokens)
+    //*/
+    console.log('verifying id token')
+    const ticket = await oauthClient.verifyIdToken({
+      idToken: tokens.id_token,
+      audience: process.env.OAUTH_CLIENT_ID,
+    })
+
+    console.log("ticket:", ticket)
+    const payload = ticket.getPayload()
+    console.log("payload:", payload)
+
+    res.status(204)
+    //*/
+  } catch (err) {
+    console.error(err)
+    return next(err)
+  }
+}
+
 function logoff(req, res) {
   res.clearCookie('jwt', cookieFlags(req))
   res.status(200).end()
@@ -239,6 +280,7 @@ async function comparePassword(inputPassword, storedHash) {
 module.exports = {
   register,
   logon,
+  googleLogon,
   show,
   logoff,
 }
