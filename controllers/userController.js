@@ -245,9 +245,15 @@ async function googleLogon(req, res, next) {
       audience: process.env.OAUTH_CLIENT_ID,
     })
 
-    console.log("ticket:", ticket)
     const payload = ticket.getPayload()
     console.log("payload:", payload)
+    const { name, email } = payload
+
+    let user = await prisma.user.findUnique({ where: { email } })
+
+    if (!user) {
+      const hashedPassword = await hashPassword('1 password omg!')
+    }
 
     res.status(204)
     //*/
