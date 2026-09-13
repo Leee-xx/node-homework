@@ -41,7 +41,6 @@ const setJwtCookie = (req, res, user) => {
 }
 
 async function createUser(payload) {
-//async function createUser(req, res, payload) {
   return await prisma.$transaction(async (tx) => {
     const newUser = await tx.user.create({
       data: payload,
@@ -70,8 +69,6 @@ async function createUser(payload) {
       },
     })
 
-    //const csrfToken = setJwtCookie(req, res, newUser)
-    //return { user: newUser, welcomeTasks, csrfToken }
     return { user: newUser, welcomeTasks }
   })
 }
