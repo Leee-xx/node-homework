@@ -1,1 +1,6 @@
 https://node-homework-eudt.onrender.com
+
+# Extras
+I implemented an OAuth feature that allows users to log onto the site. If the
+user has not previously registered on the site, the logon will create the
+account in the backend.

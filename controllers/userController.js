@@ -4,8 +4,15 @@ const scrypt = util.promisify(crypto.scrypt)
 const prisma = require('../db/prisma')
 const jwt = require('jsonwebtoken')
 const { StatusCodes } = require('http-status-codes')
+const { OAuth2Client } = require('google-auth-library')
 
 const { userSchema } = require('../validation/userSchema')
+
+const oauthClient = new OAuth2Client({
+  clientId: process.env.OAUTH_CLIENT_ID,
+  clientSecret: process.env.OAUTH_CLIENT_SECRET,
+  redirectUri: process.env.OAUTH_REDIRECT_URI,
+})
 
 const cookieFlags = (req) => {
   return {
@@ -31,6 +38,39 @@ const setJwtCookie = (req, res, user) => {
   )
 
   return payload.csrfToken
+}
+
+async function createUser(payload) {
+  return await prisma.$transaction(async (tx) => {
+    const newUser = await tx.user.create({
+      data: payload,
+      select: { name: true, email: true, id: true },
+    })
+
+    const welcomeTaskData = [
+      { title: 'Complete your profile', userId: newUser.id, priority: 'medium' },
+      { title: 'Add your first task', userId: newUser.id, priority: 'high' },
+      { title: 'Explore the app', userId: newUser.id, priority: 'low' }
+    ];
+
+    await tx.task.createMany({ data: welcomeTaskData })
+
+    const welcomeTasks = await tx.task.findMany({
+      where: {
+        userId: newUser.id,
+        title: { in: welcomeTaskData.map(t => t.title) },
+      },
+      select: {
+        id: true,
+        title: true,
+        isCompleted: true,
+        userId: true,
+        priority: true,
+      },
+    })
+
+    return { user: newUser, welcomeTasks }
+  })
 }
 
 async function register(req, res, next) {
@@ -92,39 +132,14 @@ async function register(req, res, next) {
   const hashedPassword = await hashPassword(value.password)
 
   try {
-    const result = await prisma.$transaction(async (tx) => {
-      const newUser = await tx.user.create({
-        data: { name: value.name, email: value.email, hashedPassword },
-        select: { name: true, email: true, id: true },
-      })
-
-      const welcomeTaskData = [
-        { title: 'Complete your profile', userId: newUser.id, priority: 'medium' },
-        { title: 'Add your first task', userId: newUser.id, priority: 'high' },
-        { title: 'Explore the app', userId: newUser.id, priority: 'low' }
-      ];
-
-      await tx.task.createMany({ data: welcomeTaskData })
-
-      const welcomeTasks = await tx.task.findMany({
-        where: {
-          userId: newUser.id,
-          title: { in: welcomeTaskData.map(t => t.title) },
-        },
-        select: {
-          id: true,
-          title: true,
-          isCompleted: true,
-          userId: true,
-          priority: true,
-        },
-      })
-
-      const csrfToken = setJwtCookie(req, res, newUser)
-      return { user: newUser, welcomeTasks, csrfToken }
+    const result = await createUser({
+      name: value.name,
+      email: value.email,
+      hashedPassword,
     })
+    const { user, welcomeTasks } = result
 
-    const { user, welcomeTasks, csrfToken } = result
+    const csrfToken = setJwtCookie(req, res, user)
 
     res.status(201).json({
       user,
@@ -132,7 +147,6 @@ async function register(req, res, next) {
       transactionStatus: 'success',
       csrfToken,
     })
-    return
   } catch (err) {
     if (err.code === "P2002") {
       return res.status(400).json({
@@ -216,6 +230,43 @@ async function show(req, res) {
   res.status(200).json(user)
 }
 
+async function googleLogon(req, res, next) {
+  try {
+    const { code } = req.body
+
+    if (!code) {
+      return res.status(400).json({
+        message: 'No credential provided',
+      })
+    }
+
+    const { tokens } = await oauthClient.getToken(code)
+    const ticket = await oauthClient.verifyIdToken({
+      idToken: tokens.id_token,
+      audience: process.env.OAUTH_CLIENT_ID,
+    })
+
+    const payload = ticket.getPayload()
+    const { name, email } = payload
+
+    let user = await prisma.user.findUnique({ where: { email } })
+
+    if (!user) {
+      const hashedPassword = await hashPassword('1 placeholder!')
+      const result = await createUser({ name, email, hashedPassword })
+      user = result.user
+    }
+    const csrfToken = setJwtCookie(req, res, user)
+
+    res.status(200).json({
+      name: user.name,
+      csrfToken,
+    })
+  } catch (err) {
+    return next(err)
+  }
+}
+
 function logoff(req, res) {
   res.clearCookie('jwt', cookieFlags(req))
   res.status(200).end()
@@ -239,6 +290,7 @@ async function comparePassword(inputPassword, storedHash) {
 module.exports = {
   register,
   logon,
+  googleLogon,
   show,
   logoff,
 }
